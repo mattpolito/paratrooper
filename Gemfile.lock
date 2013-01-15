@@ -1,0 +1,37 @@
+GIT
+  remote: git://github.com/heroku/heroku.git
+  revision: 5b50420ed9677622485ca018b04ad11ba4da48ab
+  specs:
+    heroku (2.34.0)
+      heroku-api (~> 0.3.7)
+      launchy (>= 0.3.2)
+      netrc (~> 0.7.7)
+      rest-client (~> 1.6.1)
+      rubyzip
+
+PATH
+  remote: .
+  specs:
+    Heroku Deployment (1.0.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    addressable (2.3.2)
+    excon (0.16.10)
+    heroku-api (0.3.7)
+      excon (~> 0.16.10)
+    launchy (2.1.2)
+      addressable (~> 2.3)
+    mime-types (1.19)
+    netrc (0.7.7)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+    rubyzip (0.9.9)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  Heroku Deployment!
+  heroku (~> 2)!

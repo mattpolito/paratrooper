@@ -1,0 +1,3 @@
+module HerokuDeployment
+  VERSION = "0.0.1"
+end

@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'heroku_deployment/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "Heroku Deployment"
+  gem.name          = "heroku_deployment"
   gem.version       = HerokuDeployment::VERSION
   gem.authors       = ['Matt Polito', 'Brandon Farmer']
   gem.email         = ['matt.polito@gmail.com', 'bthesorceror@gmail.com']

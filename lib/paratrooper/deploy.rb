@@ -1,13 +1,13 @@
-require 'heroku'
+require 'heroku-api'
 
 module Paratrooper
   class Deploy
-    attr_reader :app_name, :heroku_auth, :tag_name
+    attr_reader :app_name, :heroku, :tag_name
 
     def initialize(app_name, options = {})
-      @app_name    = app_name
-      @heroku_auth = options[:heroku_auth] || Heroku::Auth
-      @tag_name    = options[:tag]
+      @app_name = app_name
+      @heroku   = options[:heroku_auth] || Heroku::API.new(api_key: ENV['HEROKU_API_KEY'])
+      @tag_name = options[:tag]
     end
 
     def activate_maintenance_mode
@@ -66,10 +66,6 @@ module Paratrooper
 
     def app_url
       heroku.get_domains(app_name).body.last['domain']
-    end
-
-    def heroku
-      heroku_auth.api
     end
 
     def notify_screen(message)

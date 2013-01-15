@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'heroku_deployment/version'
+require 'paratrooper/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "heroku_deployment"
-  gem.version       = HerokuDeployment::VERSION
+  gem.name          = "paratrooper"
+  gem.version       = Paratrooper::VERSION
   gem.authors       = ['Matt Polito', 'Brandon Farmer']
   gem.email         = ['matt.polito@gmail.com', 'bthesorceror@gmail.com']
   gem.description   = %q{Library to create task for deployment to Heroku}
   gem.summary       = %q{Library to create task for deployment to Heroku}
-  gem.homepage      = "http://github.com/hashrocket/heroku_deployment"
+  gem.homepage      = "http://github.com/hashrocket/paratrooper"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

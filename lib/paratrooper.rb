@@ -1,7 +1,7 @@
 require 'heroku'
-require "heroku_deployment/version"
+require "paratrooper/version"
 
-class HerokuDeployment
+class Paratrooper
   attr_reader :app_name, :heroku_auth, :tag_name
 
   def initialize(app_name, options = {})

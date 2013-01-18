@@ -6,8 +6,15 @@ describe Paratrooper::Deploy do
     described_class.new(app_name, default_options.merge(options))
   end
   let(:app_name) { 'app' }
-  let(:default_options) { { heroku_auth: heroku } }
+  let(:default_options) do
+    {
+      heroku_auth: heroku,
+      formatter: formatter
+    }
+  end
+  let(:options) { Hash.new }
   let(:heroku) { double(:heroku, post_app_maintenance: true) }
+  let(:formatter) { double(:formatter, puts: '') }
 
   describe "options" do
     context "accepts :tag" do
@@ -53,9 +60,6 @@ describe Paratrooper::Deploy do
   end
 
   describe "#deactivate_maintenance_mode" do
-    let(:options) { { formatter: formatter } }
-    let(:formatter) { double(:formatter, puts: true) }
-
     it "displays message" do
       formatter.should_receive(:puts).with('Deactivating Maintenance Mode')
       deployer.deactivate_maintenance_mode

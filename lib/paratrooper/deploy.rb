@@ -1,23 +1,25 @@
 require 'heroku-api'
+require 'paratrooper/default_formatter'
 
 module Paratrooper
   class Deploy
-    attr_reader :app_name, :heroku, :tag_name
+    attr_reader :app_name, :formatter, :heroku, :tag_name
 
     def initialize(app_name, options = {})
-      @app_name = app_name
-      @heroku   = options[:heroku_auth] || Heroku::API.new(api_key: ENV['HEROKU_API_KEY'])
-      @tag_name = options[:tag]
+      @app_name  = app_name
+      @formatter = options[:formatter] || DefaultFormatter.new
+      @heroku    = options[:heroku_auth] || Heroku::API.new(api_key: ENV['HEROKU_API_KEY'])
+      @tag_name  = options[:tag]
     end
 
     def activate_maintenance_mode
       notify_screen("Activating Maintenance Mode")
-      heroku.post_app_maintenance(app_name, '1')
+      app_maintenance_on
     end
 
     def deactivate_maintenance_mode
       notify_screen("Deactivating Maintenance Mode")
-      heroku.post_app_maintenance(app_name, '0')
+      app_maintenance_off
     end
 
     def update_repo_tag
@@ -60,20 +62,28 @@ module Paratrooper
     alias_method :deploy, :default_deploy
 
     private
-    def git_remote
-      "git@heroku.com:#{app_name}.git"
+    def _app_maintenance(flag)
+      heroku.post_app_maintenance(app_name, flag)
+    end
+
+    def app_maintenance_off
+      _app_maintenance('0')
+    end
+
+    def app_maintenance_on
+      _app_maintenance('1')
     end
 
     def app_url
       heroku.get_domains(app_name).body.last['domain']
     end
 
+    def git_remote
+      "git@heroku.com:#{app_name}.git"
+    end
+
     def notify_screen(message)
-      puts
-      puts "=" * 80
-      puts ">> #{message}"
-      puts "=" * 80
-      puts
+      formatter.puts(message)
     end
   end
 end

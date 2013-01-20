@@ -123,4 +123,21 @@ describe Paratrooper::Deploy do
       deployer.push_repo
     end
   end
+
+  describe "#run_migrations" do
+    before do
+      system_caller.stub(:execute)
+    end
+
+    it 'displays message' do
+      formatter.should_receive(:puts).with('Running database migrations')
+      deployer.run_migrations
+    end
+
+    it 'pushes repo to heroku' do
+      expected_call = 'heroku run rake db:migrate --app app'
+      system_caller.should_receive(:execute).with(expected_call)
+      deployer.run_migrations
+    end
+  end
 end

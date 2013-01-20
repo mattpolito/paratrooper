@@ -18,16 +18,18 @@ Or install it yourself as:
 
 ## Usage
 
+>> Note: Before getting started, ensure that `ENV['HEROKU_API_KEY']` is set. If you do not know your api key, you can `cat ~/.netrc`. Your api key will be listed as password in that file. This is necessary until reading your crendentials out of the `.netrc` file is implemented.
+
 Instantiate Paratrooper with the name of your heroku application
 
 ```ruby
-Paratrooper.new('amazing-app')
+Paratrooper::Deploy.new('amazing-app')
 ```
 
 also you can provide a tag name for repository use
 
 ```ruby
-Paratrooper.new('amazing-app', tag: 'staging')
+Paratrooper::Deploy.new('amazing-app', tag: 'staging')
 ```
 
 Then there are methods available to perform common tasks like creating git tags, running migrations, and warming your application instance.
@@ -54,14 +56,14 @@ require 'paratrooper'
 namespace :deploy do
   desc 'Deploy app in staging environment'
   task :staging do
-    deployment = Paratrooper.new("amazing-staging-app", tag: 'staging')
+    deployment = Paratrooper::Deploy.new("amazing-staging-app", tag: 'staging')
 
     deployment.deploy
   end
 
   desc 'Deploy app in production environment'
   task :production do
-    deployment = Paratrooper.new("amazing-production-app", tag: 'production')
+    deployment = Paratrooper::Deploy.new("amazing-production-app", tag: 'production')
 
     deployment.deploy
   end

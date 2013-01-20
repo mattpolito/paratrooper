@@ -9,12 +9,14 @@ describe Paratrooper::Deploy do
   let(:default_options) do
     {
       heroku_auth: heroku,
-      formatter: formatter
+      formatter: formatter,
+      system_caller: system_caller
     }
   end
   let(:options) { Hash.new }
   let(:heroku) { double(:heroku, post_app_maintenance: true) }
   let(:formatter) { double(:formatter, puts: '') }
+  let(:system_caller) { double(:system_caller) }
 
   describe "options" do
     context "accepts :tag" do
@@ -68,6 +70,40 @@ describe Paratrooper::Deploy do
     it "makes call to heroku to turn on maintenance mode" do
       heroku.should_receive(:post_app_maintenance).with(app_name, '0')
       deployer.deactivate_maintenance_mode
+    end
+  end
+
+  describe "#update_repo_tag" do
+    context "when a tag_name is available" do
+      let(:options) { { tag: 'awesome' } }
+
+      before do
+        system_caller.stub(:execute)
+      end
+
+      it 'displays message' do
+        formatter.should_receive(:puts).with('Updating Repo Tag: awesome')
+        deployer.update_repo_tag
+      end
+
+      it 'creates a git tag' do
+        system_caller.should_receive(:execute).with('git tag awesome -f')
+        deployer.update_repo_tag
+      end
+
+      it 'pushes git tag' do
+        system_caller.should_receive(:execute).with('git push origin awesome')
+        deployer.update_repo_tag
+      end
+    end
+
+    context "when a tag_name is unavailable" do
+      let(:options) { Hash.new }
+
+      it 'no repo tags are created' do
+        system_caller.should_not_receive(:execute)
+        deployer.update_repo_tag
+      end
     end
   end
 end

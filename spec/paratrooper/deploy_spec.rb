@@ -106,4 +106,21 @@ describe Paratrooper::Deploy do
       end
     end
   end
+
+  describe "#push_repo" do
+    before do
+      system_caller.stub(:execute)
+    end
+
+    it 'displays message' do
+      formatter.should_receive(:puts).with('Pushing master to Heroku')
+      deployer.push_repo
+    end
+
+    it 'pushes repo to heroku' do
+      expected_call = 'git push -f git@heroku.com:app.git master'
+      system_caller.should_receive(:execute).with(expected_call)
+      deployer.push_repo
+    end
+  end
 end

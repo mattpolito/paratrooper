@@ -42,7 +42,8 @@ module Paratrooper
     end
 
     def app_restart
-      heroku.post_ps_restart(app_name)
+      notify_screen("Restarting application")
+      _app_restart
     end
 
     def warm_instance(wait_time = 5)
@@ -65,6 +66,10 @@ module Paratrooper
     private
     def _app_maintenance(flag)
       heroku.post_app_maintenance(app_name, flag)
+    end
+
+    def _app_restart
+      heroku.post_ps_restart(app_name)
     end
 
     def app_maintenance_off

@@ -14,7 +14,12 @@ describe Paratrooper::Deploy do
     }
   end
   let(:options) { Hash.new }
-  let(:heroku) { double(:heroku, post_app_maintenance: true) }
+  let(:heroku) do
+    double(:heroku, 
+      post_app_maintenance: true,
+      post_ps_restart: true
+    )
+  end
   let(:formatter) { double(:formatter, puts: '') }
   let(:system_caller) { double(:system_caller) }
 
@@ -138,6 +143,18 @@ describe Paratrooper::Deploy do
       expected_call = 'heroku run rake db:migrate --app app'
       system_caller.should_receive(:execute).with(expected_call)
       deployer.run_migrations
+    end
+  end
+
+  describe "#app_restart" do
+    it 'displays message' do
+      formatter.should_receive(:puts).with('Restarting application')
+      deployer.app_restart
+    end
+
+    it 'restarts your heroku instance' do
+      heroku.should_receive(:post_ps_restart).with(app_name)
+      deployer.app_restart
     end
   end
 end

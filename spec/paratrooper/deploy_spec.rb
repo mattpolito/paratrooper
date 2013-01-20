@@ -15,13 +15,17 @@ describe Paratrooper::Deploy do
   end
   let(:options) { Hash.new }
   let(:heroku) do
-    double(:heroku, 
+    double(:heroku,
       post_app_maintenance: true,
-      post_ps_restart: true
+      post_ps_restart: true,
+      get_domains: domain_response
     )
   end
   let(:formatter) { double(:formatter, puts: '') }
   let(:system_caller) { double(:system_caller) }
+  let(:domain_response) do
+    double(:domain_response, body: [{'domain' => 'application_url'}])
+  end
 
   describe "options" do
     context "accepts :tag" do
@@ -155,6 +159,24 @@ describe Paratrooper::Deploy do
     it 'restarts your heroku instance' do
       heroku.should_receive(:post_ps_restart).with(app_name)
       deployer.app_restart
+    end
+  end
+
+  describe "#warm_instance" do
+    before do
+      system_caller.stub(:execute)
+    end
+
+    it 'displays message' do
+      expected_notice = 'Accessing application_url to warm up your application'
+      formatter.should_receive(:puts).with(expected_notice)
+      deployer.warm_instance(0)
+    end
+
+    it 'pings application url' do
+      expected_call = 'curl -Il http://application_url'
+      system_caller.should_receive(:execute).with(expected_call)
+      deployer.warm_instance(0)
     end
   end
 end

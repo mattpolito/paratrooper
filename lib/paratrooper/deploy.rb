@@ -46,7 +46,7 @@ module Paratrooper
       _app_restart
     end
 
-    def warm_instance(wait_time = 5)
+    def warm_instance(wait_time = 3)
       sleep wait_time
       notify_screen("Accessing #{app_url} to warm up your application")
       system_call "curl -Il http://#{app_url}"
@@ -72,6 +72,10 @@ module Paratrooper
       heroku.post_ps_restart(app_name)
     end
 
+    def _app_domain_name
+      heroku.get_domains(app_name).body.last['domain']
+    end
+
     def app_maintenance_off
       _app_maintenance('0')
     end
@@ -81,7 +85,7 @@ module Paratrooper
     end
 
     def app_url
-      heroku.get_domains(app_name).body.last['domain']
+      _app_domain_name
     end
 
     def git_remote

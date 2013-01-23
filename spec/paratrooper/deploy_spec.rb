@@ -59,8 +59,12 @@ describe Paratrooper::Deploy do
     let(:options) { { formatter: formatter } }
     let(:formatter) { double(:formatter, puts: true) }
 
+    before do
+      formatter.stub(:display)
+    end
+
     it "displays message" do
-      formatter.should_receive(:puts).with('Activating Maintenance Mode')
+      formatter.should_receive(:display).with('Activating Maintenance Mode')
       deployer.activate_maintenance_mode
     end
 
@@ -71,8 +75,12 @@ describe Paratrooper::Deploy do
   end
 
   describe "#deactivate_maintenance_mode" do
+    before do
+      formatter.stub(:display)
+    end
+
     it "displays message" do
-      formatter.should_receive(:puts).with('Deactivating Maintenance Mode')
+      formatter.should_receive(:display).with('Deactivating Maintenance Mode')
       deployer.deactivate_maintenance_mode
     end
 
@@ -88,10 +96,11 @@ describe Paratrooper::Deploy do
 
       before do
         system_caller.stub(:execute)
+        formatter.stub(:display)
       end
 
       it 'displays message' do
-        formatter.should_receive(:puts).with('Updating Repo Tag: awesome')
+        formatter.should_receive(:display).with('Updating Repo Tag: awesome')
         deployer.update_repo_tag
       end
 
@@ -119,10 +128,11 @@ describe Paratrooper::Deploy do
   describe "#push_repo" do
     before do
       system_caller.stub(:execute)
+      formatter.stub(:display)
     end
 
     it 'displays message' do
-      formatter.should_receive(:puts).with('Pushing master to Heroku')
+      formatter.should_receive(:display).with('Pushing master to Heroku')
       deployer.push_repo
     end
 
@@ -136,10 +146,11 @@ describe Paratrooper::Deploy do
   describe "#run_migrations" do
     before do
       system_caller.stub(:execute)
+      formatter.stub(:display)
     end
 
     it 'displays message' do
-      formatter.should_receive(:puts).with('Running database migrations')
+      formatter.should_receive(:display).with('Running database migrations')
       deployer.run_migrations
     end
 
@@ -151,8 +162,12 @@ describe Paratrooper::Deploy do
   end
 
   describe "#app_restart" do
+    before do
+      formatter.stub(:display)
+    end
+
     it 'displays message' do
-      formatter.should_receive(:puts).with('Restarting application')
+      formatter.should_receive(:display).with('Restarting application')
       deployer.app_restart
     end
 
@@ -165,11 +180,12 @@ describe Paratrooper::Deploy do
   describe "#warm_instance" do
     before do
       system_caller.stub(:execute)
+      formatter.stub(:display)
     end
 
     it 'displays message' do
       expected_notice = 'Accessing application_url to warm up your application'
-      formatter.should_receive(:puts).with(expected_notice)
+      formatter.should_receive(:display).with(expected_notice)
       deployer.warm_instance(0)
     end
 

@@ -93,7 +93,7 @@ module Paratrooper
     end
 
     def notify_screen(message)
-      formatter.puts(message)
+      formatter.display(message)
     end
 
     def system_call(call)

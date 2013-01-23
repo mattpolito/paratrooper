@@ -1,6 +1,6 @@
 module Paratrooper
   class DefaultFormatter
-    def puts(message)
+    def display(message)
       puts
       puts "=" * 80
       puts ">> #{message}"

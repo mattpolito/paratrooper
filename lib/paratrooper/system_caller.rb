@@ -1,4 +1,4 @@
-SystemCaller = Struct.new(:call) do
+class SystemCaller
   def execute
     system(call)
   end

@@ -1,5 +1,6 @@
 require 'heroku-api'
 require 'paratrooper/default_formatter'
+require 'paratrooper/system_caller'
 
 module Paratrooper
   class Deploy
@@ -98,12 +99,6 @@ module Paratrooper
 
     def system_call(call)
       system_caller.execute(call)
-    end
-  end
-
-  SystemCaller = Struct.new(:call) do
-    def execute
-      system(call)
     end
   end
 end

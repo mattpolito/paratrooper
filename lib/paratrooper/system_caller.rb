@@ -1,5 +1,5 @@
 class SystemCaller
-  def execute
+  def execute(call)
     system(call)
   end
 end

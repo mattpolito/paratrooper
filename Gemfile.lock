@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    paratrooper (0.0.2)
+    paratrooper (0.0.5)
       heroku-api
 
 GEM
@@ -17,6 +17,7 @@ GEM
       coderay (~> 1.0.5)
       method_source (~> 0.8)
       slop (~> 3.3.1)
+    rake (10.0.3)
     rspec (2.12.0)
       rspec-core (~> 2.12.0)
       rspec-expectations (~> 2.12.0)
@@ -33,4 +34,5 @@ PLATFORMS
 DEPENDENCIES
   paratrooper!
   pry
+  rake
   rspec (~> 2.12)

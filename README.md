@@ -2,6 +2,8 @@
 
 Library for handling common tasks when deploying to [Heroku](http://heroku.com)
 
+[![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
+
 ## Installation
 
 Add this line to your application's Gemfile:

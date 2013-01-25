@@ -1,11 +1,19 @@
+require 'stringio'
+
 module Paratrooper
   class DefaultFormatter
+    attr_reader :output
+
+    def initialize(output = StringIO.new)
+      @output = output
+    end
+
     def display(message)
-      puts
-      puts "=" * 80
-      puts ">> #{message}"
-      puts "=" * 80
-      puts
+      output.puts
+      output.puts "=" * 80
+      output.puts ">> #{message}"
+      output.puts "=" * 80
+      output.puts
     end
   end
 end

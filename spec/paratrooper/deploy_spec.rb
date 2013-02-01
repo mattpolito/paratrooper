@@ -8,7 +8,7 @@ describe Paratrooper::Deploy do
   let(:app_name) { 'app' }
   let(:default_options) do
     {
-      heroku_auth: heroku,
+      heroku: heroku,
       formatter: formatter,
       system_caller: system_caller
     }
@@ -16,9 +16,10 @@ describe Paratrooper::Deploy do
   let(:options) { Hash.new }
   let(:heroku) do
     double(:heroku,
-      post_app_maintenance: true,
-      post_ps_restart: true,
-      get_domains: domain_response
+      app_url: 'application_url',
+      app_restart: true,
+      app_maintenance_on: true,
+      app_maintenance_off: true,
     )
   end
   let(:formatter) { double(:formatter, puts: '') }
@@ -69,7 +70,7 @@ describe Paratrooper::Deploy do
     end
 
     it "makes call to heroku to turn on maintenance mode" do
-      heroku.should_receive(:post_app_maintenance).with(app_name, '1')
+      heroku.should_receive(:app_maintenance_on)
       deployer.activate_maintenance_mode
     end
   end
@@ -85,7 +86,7 @@ describe Paratrooper::Deploy do
     end
 
     it "makes call to heroku to turn on maintenance mode" do
-      heroku.should_receive(:post_app_maintenance).with(app_name, '0')
+      heroku.should_receive(:app_maintenance_off)
       deployer.deactivate_maintenance_mode
     end
   end
@@ -172,7 +173,7 @@ describe Paratrooper::Deploy do
     end
 
     it 'restarts your heroku instance' do
-      heroku.should_receive(:post_ps_restart).with(app_name)
+      heroku.should_receive(:app_restart)
       deployer.app_restart
     end
   end

@@ -25,26 +25,17 @@ describe Paratrooper::HerokuWrapper do
       it 'returns provided api key' do
         expect(wrapper.api_key).to eq('PROVIDED_API_KEY')
       end
-
-      context 'and environment variable is set' do
-        before do
-          ENV.stub(:[]).with('HEROKU_API_KEY').and_return('ENV_API_KEY')
-        end
-
-        it 'returns provided api key' do
-          expect(wrapper.api_key).to eq('PROVIDED_API_KEY')
-        end
-      end
-
     end
 
-    context 'when environment variable is set' do
-      before do
-        ENV.stub(:[]).with('HEROKU_API_KEY').and_return('ENV_API_KEY')
+    context 'when no key is provided' do
+      let(:options) do
+        {
+          key_extractor: double(:key_extractor, get_credentials: 'NETRC_API_KEY')
+        }
       end
 
-      it 'returns api key from environment' do
-        expect(wrapper.api_key).to eq('ENV_API_KEY')
+      it 'returns api key from locally stored file' do
+        expect(wrapper.api_key).to eq('NETRC_API_KEY')
       end
     end
   end

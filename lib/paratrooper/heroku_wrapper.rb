@@ -1,13 +1,15 @@
 require 'heroku-api'
+require 'paratrooper/local_api_key_extractor'
 
 module Paratrooper
   class HerokuWrapper
-    attr_reader :api_key, :app_name, :heroku_api
+    attr_reader :api_key, :app_name, :heroku_api, :key_extractor
 
     def initialize(app_name, options = {})
-      @app_name = app_name
-      @api_key  = options[:api_key] || ENV['HEROKU_API_KEY']
-      @heroku_api   = options[:heroku_api] || Heroku::API.new(api_key: api_key)
+      @app_name      = app_name
+      @key_extractor = options[:key_extractor] || LocalApiKeyExtractor
+      @api_key       = options[:api_key] || key_extractor.get_credentials
+      @heroku_api    = options[:heroku_api] || Heroku::API.new(api_key: api_key)
     end
 
     def app_restart

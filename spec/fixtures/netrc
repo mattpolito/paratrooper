@@ -1,0 +1,6 @@
+machine api.heroku.com
+  login mattman@example.com
+  password LOCAL_API_KEY
+machine code.heroku.com
+  login mattman@example.com
+  password LOCAL_API_KEY

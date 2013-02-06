@@ -9,7 +9,8 @@ describe Paratrooper::HerokuWrapper do
   let(:options) { Hash.new }
   let(:default_options) do
     {
-      heroku_api: heroku_api
+      heroku_api: heroku_api,
+      key_extractor: double(:key_extractor, get_credentials: 'API_KEY')
     }
   end
   let(:heroku_api) { double(:heroku_api) }

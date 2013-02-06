@@ -1,9 +1,14 @@
 require 'spec_helper'
+require 'fileutils'
 require 'paratrooper/local_api_key_extractor'
 
 describe Paratrooper::LocalApiKeyExtractor do
   let(:netrc_klass) { double(:netrc_klass, default_path: fixture_file_path) }
   let(:fixture_file_path) { fixture_path('netrc') }
+
+  before do
+    File.chmod(0600, fixture_file_path)
+  end
 
   describe 'file association' do
     context 'when file path is provided' do

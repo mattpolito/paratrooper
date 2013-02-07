@@ -1,5 +1,7 @@
-class SystemCaller
-  def execute(call)
-    system(call)
+module Paratrooper
+  class SystemCaller
+    def execute(call)
+      system(call)
+    end
   end
 end

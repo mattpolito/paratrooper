@@ -4,6 +4,8 @@ Library for handling common tasks when deploying to [Heroku][]
 
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
 
+[![Code Climate](https://codeclimate.com/github/mattpolito/paratrooper.png)](https://codeclimate.com/github/mattpolito/paratrooper)
+
 ## Installation
 
 Add this line to your application's Gemfile:

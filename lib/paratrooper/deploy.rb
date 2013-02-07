@@ -4,13 +4,15 @@ require 'paratrooper/system_caller'
 
 module Paratrooper
   class Deploy
-    attr_reader :app_name, :formatter, :system_caller, :heroku, :tag_name
+    attr_reader :app_name, :formatter, :system_caller, :heroku, :tag_name,
+      :deploy_tag
 
     def initialize(app_name, options = {})
       @app_name      = app_name
       @formatter     = options[:formatter] || DefaultFormatter.new
       @heroku        = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name      = options[:tag]
+      @deploy_tag    = options[:deploy_tag]
       @system_caller = options[:system_caller] || SystemCaller.new
     end
 
@@ -32,9 +34,10 @@ module Paratrooper
       end
     end
 
-    def push_repo(branch = 'master')
-      notify_screen("Pushing #{branch} to Heroku")
-      system_call "git push -f #{git_remote} #{branch}"
+    def push_repo
+      reference = deploy_tag || 'master'
+      notify_screen("Pushing #{reference} to Heroku")
+      system_call "git push -f #{git_remote} #{reference}:master"
     end
 
     def run_migrations

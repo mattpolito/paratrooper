@@ -1,6 +1,6 @@
 # Paratrooper
 
-Library for handling common tasks when deploying to [Heroku](http://heroku.com)
+Library for handling common tasks when deploying to [Heroku][]
 
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
 
@@ -20,8 +20,6 @@ Or install it yourself as:
 
 ## Usage
 
->> Note: Before getting started, ensure that `ENV['HEROKU_API_KEY']` is set. If you do not know your api key, you can `cat ~/.netrc`. Your api key will be listed as password in that file. This is necessary until reading your crendentials out of the `.netrc` file is implemented.
-
 Instantiate Paratrooper with the name of your heroku application
 
 ```ruby
@@ -35,6 +33,30 @@ Paratrooper::Deploy.new('amazing-app', tag: 'staging')
 ```
 
 Then there are methods available to perform common tasks like creating git tags, running migrations, and warming your application instance.
+
+## Authentication
+
+Authentication with your Heroku account can happen in a few different ways
+
+* Providing API Key
+
+```ruby
+Paratrooper::Deploy.new('app', api_key: 'API_KEY')
+```
+
+* Via environment variable
+
+```ruby
+ENV['HEROKU_API_KEY'] = 'API_KEY'
+Paratrooper::Deploy.new('app')
+```
+
+* Local file storage
+  This method works via a local Netrc file. Storage of this key is handled via the [Heroku Toolbelt][]. This is the default and preferred method of providing your authentication key.
+
+```ruby
+Paratrooper::Deploy.new('app')
+```
 
 ## Sensible Default Deployment
 
@@ -72,6 +94,11 @@ namespace :deploy do
 end
 ```
 
+## Nice to haves
+
+* deploy to heroku from tags
+* send [New Relic][] a notification to toggle heartbeat during deploy
+
 ## Contributing
 
 1. Fork it
@@ -79,3 +106,7 @@ end
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+[Heroku]: http://heroku.com
+[Heroku Toolbelt]: http://toolbelt.heroku.com
+[New Relic]: http://newrelic.com

@@ -1,10 +1,10 @@
-# Paratrooper
+## Paratrooper
 
-Library for handling common tasks when deploying to [Heroku][]
-
+[![Gem Version](https://badge.fury.io/rb/paratrooper.png)](http://badge.fury.io/rb/paratrooper)
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
-
 [![Code Climate](https://codeclimate.com/github/mattpolito/paratrooper.png)](https://codeclimate.com/github/mattpolito/paratrooper)
+
+Make your complex deploy to [Heroku][] easy.
 
 ## Installation
 

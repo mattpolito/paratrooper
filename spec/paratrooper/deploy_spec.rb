@@ -105,9 +105,22 @@ describe Paratrooper::Deploy do
         deployer.update_repo_tag
       end
 
-      it 'creates a git tag' do
-        system_caller.should_receive(:execute).with('git tag awesome -f')
-        deployer.update_repo_tag
+      context "when deploy_tag is available" do
+        before do
+          options.merge!(deploy_tag: 'deploy_this')
+        end
+
+        it 'creates a git tag at deploy_tag reference point' do
+          system_caller.should_receive(:execute).with('git tag awesome deploy_this -f')
+          deployer.update_repo_tag
+        end
+      end
+
+      context "when no deploy_tag is available" do
+        it 'creates a git tag at HEAD' do
+          system_caller.should_receive(:execute).with('git tag awesome master -f')
+          deployer.update_repo_tag
+        end
       end
 
       it 'pushes git tag' do

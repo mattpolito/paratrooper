@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
 [![Code Climate](https://codeclimate.com/github/mattpolito/paratrooper.png)](https://codeclimate.com/github/mattpolito/paratrooper)
 
-Make your complex deploy to [Heroku][] easy.
+Make your complex deploy to [Heroku][] easy. This library affords you the ability to make a quick and concise deployment rake task.
 
 ## Installation
 
@@ -60,6 +60,27 @@ Paratrooper::Deploy.new('app')
 Paratrooper::Deploy.new('app')
 ```
 
+## Tag Management
+
+By providing tag options into Paratrooper, your code can be tagged and deployed from different reference points.
+
+### Staging example
+```ruby
+  Paratrooper::Deploy.new("staging-app",
+    tag: 'staging'
+  )
+```
+This will create/update a `staging` git tag at `HEAD`
+
+### Production example
+```ruby
+  Paratrooper::Deploy.new("amazing-production-app",
+    tag: 'production'
+    match_tag_to: 'staging'
+  )
+```
+This will create/update a `production` git tag at `staging` and deploys the `production` tag
+
 ## Sensible Default Deployment
 
 You can use the objects methods any way you'd like but we've provided a sensible default at `Paratrooper#deploy`
@@ -74,31 +95,67 @@ This will perform the following tasks:
 * Deactivate maintenance mode
 * Warm application instance
 
-## Example Usage
-
+### Example Usage
 ```ruby
 require 'paratrooper'
 
 namespace :deploy do
   desc 'Deploy app in staging environment'
   task :staging do
-    deployment = Paratrooper::Deploy.new("amazing-staging-app", tag: 'staging')
+    deployment = Paratrooper::Deploy.new("amazing-staging-app",
+      tag: 'staging'
+    )
 
     deployment.deploy
   end
 
   desc 'Deploy app in production environment'
   task :production do
-    deployment = Paratrooper::Deploy.new("amazing-production-app", tag: 'production')
+    Paratrooper::Deploy.new("amazing-production-app",
+      tag: 'production'
+      match_tag_to: 'staging'
+    )
 
     deployment.deploy
   end
 end
 ```
 
+## Bucking the Norm
+
+Our default deploy gets us most of the way but maybe it's not for you. We've got you covered. Once you've instantated Paratrooper, you have access to all of the included methods as well as any arbitrary code that needs to be run.
+
+Say you want to let [New Relic][] know that you are deploying. That way your heartbeat notifications will not make you crazy with false downtime.
+
+### Example Usage
+```ruby
+require 'paratrooper'
+
+namespace :deploy do
+  desc 'Deploy app in production environment'
+  task :production do
+    Paratrooper::Deploy.new("amazing-production-app",
+      tag: 'production'
+      match_tag_to: 'staging'
+    )
+
+    %x[curl https://heroku.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/disable -X POST -H "X-Api-Key: API_KEY"]
+
+    deployment.activate_maintenance_mode
+    deployment.update_repo_tag
+    deployment.push_repo
+    deployment.run_migrations
+    deployment.app_restart
+    deployment.deactivate_maintenance_mode
+    deployment.warm_instance
+
+    %x[curl https://heroku.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/enable -X POST -H "X-Api-Key: API_KEY"]
+  end
+end
+```
+
 ## Nice to haves
 
-* deploy to heroku from tags
 * send [New Relic][] a notification to toggle heartbeat during deploy
 
 ## Contributing

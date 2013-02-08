@@ -107,7 +107,7 @@ describe Paratrooper::Deploy do
 
       context "when deploy_tag is available" do
         before do
-          options.merge!(deploy_tag: 'deploy_this')
+          options.merge!(match_tag_to: 'deploy_this')
         end
 
         it 'creates a git tag at deploy_tag reference point' do

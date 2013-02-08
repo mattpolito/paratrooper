@@ -5,14 +5,14 @@ require 'paratrooper/system_caller'
 module Paratrooper
   class Deploy
     attr_reader :app_name, :formatter, :system_caller, :heroku, :tag_name,
-      :deploy_tag
+      :match_tag
 
     def initialize(app_name, options = {})
       @app_name      = app_name
       @formatter     = options[:formatter] || DefaultFormatter.new
       @heroku        = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name      = options[:tag]
-      @deploy_tag    = options[:deploy_tag] || 'master'
+      @match_tag     = options[:match_tag_to] || 'master'
       @system_caller = options[:system_caller] || SystemCaller.new
     end
 
@@ -29,14 +29,15 @@ module Paratrooper
     def update_repo_tag
       unless tag_name.nil? || tag_name.empty?
         notify_screen("Updating Repo Tag: #{tag_name}")
-        system_call "git tag #{tag_name} #{deploy_tag} -f"
+        system_call "git tag #{tag_name} #{match_tag} -f"
         system_call "git push origin #{tag_name}"
       end
     end
 
     def push_repo
-      notify_screen("Pushing #{deploy_tag} to Heroku")
-      system_call "git push -f #{git_remote} #{deploy_tag}:master"
+      reference_point = tag_name || 'master'
+      notify_screen("Pushing #{reference_point} to Heroku")
+      system_call "git push -f #{git_remote} #{reference_point}:master"
     end
 
     def run_migrations

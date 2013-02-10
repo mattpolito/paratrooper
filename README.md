@@ -4,41 +4,47 @@
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
 [![Code Climate](https://codeclimate.com/github/mattpolito/paratrooper.png)](https://codeclimate.com/github/mattpolito/paratrooper)
 
-Make your complex deploy to [Heroku][] easy. This library affords you the ability to make a quick and concise deployment rake task.
+Simplify your [Heroku][] deploy with quick and concise deployment rake tasks.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'paratrooper'
+```shell
+  gem 'paratrooper'
+```
 
-And then execute:
+and then execute
 
-    $ bundle
+```shell
+  bundle
+```
 
-Or install it yourself as:
+or
 
-    $ gem install paratrooper
+install it yourself with
+
+```shell
+  gem install paratrooper
+```
 
 ## Usage
 
-Instantiate Paratrooper with the name of your heroku application
+Instantiate Paratrooper with the name of your heroku application.
 
 ```ruby
 Paratrooper::Deploy.new('amazing-app')
 ```
 
-also you can provide a tag name for repository use
+You can also provide a tag:
 
 ```ruby
 Paratrooper::Deploy.new('amazing-app', tag: 'staging')
 ```
 
-Then there are methods available to perform common tasks like creating git tags, running migrations, and warming your application instance.
-
 ## Authentication
 
-Authentication with your Heroku account can happen in a few different ways
+You can authenticate your Heroku account in a few different ways:
 
 * Providing API Key
 
@@ -46,19 +52,20 @@ Authentication with your Heroku account can happen in a few different ways
 Paratrooper::Deploy.new('app', api_key: 'API_KEY')
 ```
 
-* Via environment variable
+* Setting an environment variable
 
 ```ruby
 ENV['HEROKU_API_KEY'] = 'API_KEY'
 Paratrooper::Deploy.new('app')
 ```
 
-* Local file storage
-  This method works via a local Netrc file. Storage of this key is handled via the [Heroku Toolbelt][]. This is the default and preferred method of providing your authentication key.
+* Local Netrc file
 
 ```ruby
 Paratrooper::Deploy.new('app')
 ```
+
+This method works via a local Netrc file which is handled via the [Heroku Toolbelt][] and is the default and preferred method of providing your authentication key.
 
 ## Tag Management
 
@@ -83,7 +90,7 @@ This will create/update a `production` git tag at `staging` and deploys the `pro
 
 ## Sensible Default Deployment
 
-You can use the objects methods any way you'd like but we've provided a sensible default at `Paratrooper#deploy`
+You can use the objects methods any way you'd like, but we've provided a sensible default at `Paratrooper#deploy`
 
 This will perform the following tasks:
 
@@ -96,6 +103,7 @@ This will perform the following tasks:
 * Warm application instance
 
 ### Example Usage
+
 ```ruby
 require 'paratrooper'
 
@@ -123,11 +131,12 @@ end
 
 ## Bucking the Norm
 
-Our default deploy gets us most of the way but maybe it's not for you. We've got you covered. Once you've instantated Paratrooper, you have access to all of the included methods as well as any arbitrary code that needs to be run.
+Our default deploy gets us most of the way, but maybe it's not for you. We've got you covered. Every instance of Paratrooper will have access to all of the included methods so you can build your custom deploy.
 
-Say you want to let [New Relic][] know that you are deploying. That way your heartbeat notifications will not make you crazy with false downtime.
+For example, say you want to let [New Relic][] know that you are deploying and to disable your heartbeart.
 
 ### Example Usage
+
 ```ruby
 require 'paratrooper'
 
@@ -156,7 +165,7 @@ end
 
 ## Nice to haves
 
-* send [New Relic][] a notification to toggle heartbeat during deploy
+* Send [New Relic][] a notification to toggle heartbeat during deploy
 
 ## Contributing
 

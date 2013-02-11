@@ -4,7 +4,7 @@ module Paratrooper
   class DefaultFormatter
     attr_reader :output
 
-    def initialize(output = StringIO.new)
+    def initialize(output = STDOUT)
       @output = output
     end
 

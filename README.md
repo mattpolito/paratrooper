@@ -119,7 +119,7 @@ namespace :deploy do
 
   desc 'Deploy app in production environment'
   task :production do
-    Paratrooper::Deploy.new("amazing-production-app",
+    deployment = Paratrooper::Deploy.new("amazing-production-app",
       tag: 'production'
       match_tag_to: 'staging'
     )
@@ -143,7 +143,7 @@ require 'paratrooper'
 namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
-    Paratrooper::Deploy.new("amazing-production-app",
+    deployment = Paratrooper::Deploy.new("amazing-production-app",
       tag: 'production'
       match_tag_to: 'staging'
     )

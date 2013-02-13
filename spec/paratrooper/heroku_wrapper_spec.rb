@@ -62,11 +62,33 @@ describe Paratrooper::HerokuWrapper do
     end
   end
 
-  describe '#app_domain_name' do
-    let(:response) { double(:response, body: [{'domain' => 'APP_URL'}]) }
-    it "calls down to heroku api" do
-      heroku_api.should_receive(:get_domains).with(app_name).and_return(response)
-      wrapper.app_url
+  describe '#app_url' do
+    context 'when custom domains are available' do
+      let(:response) { double(:response, body: [{'domain' => 'APP_URL'}]) }
+
+      it "calls down to heroku api" do
+        heroku_api.should_receive(:get_domains).with(app_name).and_return(response)
+        wrapper.app_url
+      end
+    end
+
+    context 'when custom urls are not available' do
+      let(:response) do
+        double(:response, body: { 'domain_name' => { 'domain' => 'APP_URL' } })
+      end
+
+      let(:domain_response) do
+        double(:domain_response, body: [])
+      end
+
+      before do
+        heroku_api.stub(:get_domains).and_return(domain_response)
+      end
+
+      it "makes call to get default heroku app url" do
+        heroku_api.should_receive(:get_app).with(app_name).and_return(response)
+        expect(wrapper.app_url).to eq('APP_URL')
+      end
     end
   end
 end

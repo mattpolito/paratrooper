@@ -82,7 +82,7 @@ This will create/update a `staging` git tag at `HEAD`
 ### Production example
 ```ruby
   Paratrooper::Deploy.new("amazing-production-app",
-    tag: 'production'
+    tag: 'production',
     match_tag_to: 'staging'
   )
 ```
@@ -120,7 +120,7 @@ namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
     deployment = Paratrooper::Deploy.new("amazing-production-app",
-      tag: 'production'
+      tag: 'production',
       match_tag_to: 'staging'
     )
 
@@ -144,7 +144,7 @@ namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
     deployment = Paratrooper::Deploy.new("amazing-production-app",
-      tag: 'production'
+      tag: 'production',
       match_tag_to: 'staging'
     )
 

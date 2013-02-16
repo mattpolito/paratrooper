@@ -57,12 +57,14 @@ module Paratrooper
     end
 
     def default_deploy
-      activate_maintenance_mode
-      update_repo_tag
-      push_repo
-      run_migrations
-      app_restart
-      deactivate_maintenance_mode
+      (
+        activate_maintenance_mode &&
+        update_repo_tag &&
+        push_repo &&
+        run_migrations &&
+        app_restart
+      ) &&
+      deactivate_maintenance_mode &&
       warm_instance
     end
     alias_method :deploy, :default_deploy
@@ -82,6 +84,7 @@ module Paratrooper
 
     def system_call(call)
       system_caller.execute(call)
+      system_caller.status == 0 ? true : false
     end
   end
 end

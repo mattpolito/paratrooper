@@ -84,7 +84,6 @@ module Paratrooper
 
     def system_call(call)
       system_caller.execute(call)
-      system_caller.status == 0 ? true : false
     end
   end
 end

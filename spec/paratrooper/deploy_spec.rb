@@ -97,7 +97,7 @@ describe Paratrooper::Deploy do
 
       before do
         system_caller.stub(:execute)
-        system_caller.stub(:status).and_return(0)
+        system_caller.stub(:status).and_return(true)
         formatter.stub(:display)
       end
 
@@ -120,14 +120,14 @@ describe Paratrooper::Deploy do
       context "when no deploy_tag is available" do
         it 'creates a git tag at HEAD' do
           system_caller.should_receive(:execute).with('git tag awesome master -f')
-          system_caller.stub(:status).and_return(0)
+          system_caller.stub(:status).and_return(true)
           deployer.update_repo_tag
         end
       end
 
       it 'pushes git tag' do
         system_caller.should_receive(:execute).with('git push origin awesome')
-        system_caller.stub(:status).and_return(0)
+        system_caller.stub(:status).and_return(true)
         deployer.update_repo_tag
       end
     end
@@ -137,7 +137,7 @@ describe Paratrooper::Deploy do
 
       it 'no repo tags are created' do
         system_caller.should_not_receive(:execute)
-        system_caller.stub(:status).and_return(0)
+        system_caller.stub(:status).and_return(true)
         deployer.update_repo_tag
       end
     end
@@ -147,7 +147,7 @@ describe Paratrooper::Deploy do
     context "when the push succeeds" do
       before do
         system_caller.stub(:execute)
-        system_caller.stub(:status).and_return(0)
+        system_caller.stub(:status).and_return(true)
         formatter.stub(:display)
       end
 
@@ -166,14 +166,14 @@ describe Paratrooper::Deploy do
     context 'when the push fails' do
       before do
         system_caller.stub(:execute)
-        system_caller.stub(:status).and_return(127)
+        system_caller.stub(:status).and_return(nil)
         formatter.stub(:display)
       end
 
       it 'returns false when git push fails' do
         expected_call = 'git push -f git@heroku.com:app.git master:master'
         system_caller.should_receive(:execute).with(expected_call)
-        expect(deployer.push_repo).to be_false
+        expect(deployer.push_repo).to be_nil
       end
     end
   end
@@ -181,7 +181,7 @@ describe Paratrooper::Deploy do
   describe "#run_migrations" do
     before do
       system_caller.stub(:execute)
-      system_caller.stub(:status).and_return(0)
+      system_caller.stub(:status).and_return(true)
       formatter.stub(:display)
     end
 
@@ -216,7 +216,7 @@ describe Paratrooper::Deploy do
   describe "#warm_instance" do
     before do
       system_caller.stub(:execute)
-      system_caller.stub(:status).and_return(0)
+      system_caller.stub(:status).and_return(true)
       formatter.stub(:display)
     end
 

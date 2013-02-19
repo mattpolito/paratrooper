@@ -96,7 +96,7 @@ describe Paratrooper::Deploy do
       let(:options) { { tag: 'awesome' } }
 
       before do
-        system_caller.stub(:execute)
+        system_caller.stub(:execute).and_return(true)
         formatter.stub(:display)
       end
 
@@ -111,20 +111,20 @@ describe Paratrooper::Deploy do
         end
 
         it 'creates a git tag at deploy_tag reference point' do
-          system_caller.should_receive(:execute).with('git tag awesome deploy_this -f')
+          system_caller.should_receive(:execute).with('git tag awesome deploy_this -f').and_return(true)
           deployer.update_repo_tag
         end
       end
 
       context "when no deploy_tag is available" do
         it 'creates a git tag at HEAD' do
-          system_caller.should_receive(:execute).with('git tag awesome master -f')
+          system_caller.should_receive(:execute).with('git tag awesome master -f').and_return(true)
           deployer.update_repo_tag
         end
       end
 
       it 'pushes git tag' do
-        system_caller.should_receive(:execute).with('git push origin awesome')
+        system_caller.should_receive(:execute).with('git push origin awesome').and_return(true)
         deployer.update_repo_tag
       end
     end
@@ -133,33 +133,48 @@ describe Paratrooper::Deploy do
       let(:options) { Hash.new }
 
       it 'no repo tags are created' do
-        system_caller.should_not_receive(:execute)
+        system_caller.should_not_receive(:execute).and_return(true)
         deployer.update_repo_tag
       end
     end
   end
 
   describe "#push_repo" do
-    before do
-      system_caller.stub(:execute)
-      formatter.stub(:display)
+    context "when the push succeeds" do
+      before do
+        system_caller.stub(:execute).and_return(true)
+        formatter.stub(:display)
+      end
+
+      it 'displays message' do
+        formatter.should_receive(:display).with('Pushing master to Heroku')
+        deployer.push_repo
+      end
+
+      it 'pushes repo to heroku' do
+        expected_call = 'git push -f git@heroku.com:app.git master:master'
+        system_caller.should_receive(:execute).with(expected_call).and_return(true)
+        expect(deployer.push_repo).to be_true
+      end
     end
 
-    it 'displays message' do
-      formatter.should_receive(:display).with('Pushing master to Heroku')
-      deployer.push_repo
-    end
+    context 'when the push fails' do
+      before do
+        system_caller.stub(:execute).and_return(true)
+        formatter.stub(:display)
+      end
 
-    it 'pushes repo to heroku' do
-      expected_call = 'git push -f git@heroku.com:app.git master:master'
-      system_caller.should_receive(:execute).with(expected_call)
-      deployer.push_repo
+      it 'returns false when git push fails' do
+        expected_call = 'git push -f git@heroku.com:app.git master:master'
+        system_caller.should_receive(:execute).with(expected_call).and_return(nil)
+        expect(deployer.push_repo).to be_nil
+      end
     end
   end
 
   describe "#run_migrations" do
     before do
-      system_caller.stub(:execute)
+      system_caller.stub(:execute).and_return(true)
       formatter.stub(:display)
     end
 
@@ -193,19 +208,19 @@ describe Paratrooper::Deploy do
 
   describe "#warm_instance" do
     before do
-      system_caller.stub(:execute)
+      system_caller.stub(:execute).and_return(true)
       formatter.stub(:display)
     end
 
     it 'displays message' do
       expected_notice = 'Accessing application_url to warm up your application'
-      formatter.should_receive(:display).with(expected_notice)
+      formatter.should_receive(:display).with(expected_notice).and_return(true)
       deployer.warm_instance(0)
     end
 
     it 'pings application url' do
       expected_call = 'curl -Il http://application_url'
-      system_caller.should_receive(:execute).with(expected_call)
+      system_caller.should_receive(:execute).with(expected_call).and_return(true)
       deployer.warm_instance(0)
     end
   end

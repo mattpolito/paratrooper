@@ -209,7 +209,7 @@ describe Paratrooper::Deploy do
   describe "#warm_instance" do
     before do
       system_caller.stub(:execute).and_return(true)
-      formatte.stub(:display)
+      formatter.stub(:display)
     end
 
     it 'displays message' do

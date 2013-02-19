@@ -4,7 +4,7 @@ module Paratrooper
     attr_accessor :status
 
     def execute(call)
-      status = system(call)
+      self.status = system(call)
     end
   end
 end

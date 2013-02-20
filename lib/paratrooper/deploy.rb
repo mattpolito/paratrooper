@@ -30,7 +30,7 @@ module Paratrooper
       unless tag_name.nil? || tag_name.empty?
         notify_screen("Updating Repo Tag: #{tag_name}")
         system_call "git tag #{tag_name} #{match_tag} -f"
-        system_call "git push origin #{tag_name}"
+        system_call "git push -f origin #{tag_name}"
       end
     end
 

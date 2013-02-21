@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'paratrooper/default_formatter'
+require 'stringio'
 
 describe Paratrooper::DefaultFormatter do
   let(:formatter) { described_class.new(output_stub) }

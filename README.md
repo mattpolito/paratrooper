@@ -1,4 +1,4 @@
-## Paratrooper
+![Paratrooper](http://f.cl.ly/items/2T1w3e2s09002E3A1q1w/paratrooper_header.png)
 
 [![Gem Version](https://badge.fury.io/rb/paratrooper.png)](http://badge.fury.io/rb/paratrooper)
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
@@ -175,6 +175,11 @@ end
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+## Thanks
+
+* [Rye Mason][] for the fantastic heading image
+
 [Heroku]: http://heroku.com
 [Heroku Toolbelt]: http://toolbelt.heroku.com
 [New Relic]: http://newrelic.com
+[Rye Mason]: https://github.com/ryenotbread

@@ -1,4 +1,4 @@
-![Paratrooper](http://f.cl.ly/items/2T1w3e2s09002E3A1q1w/paratrooper_header.png)
+![Paratrooper](http://f.cl.ly/items/0Z1v1P1l1B1h1k1l2q0E/paratrooper_header.png)
 
 [![Gem Version](https://badge.fury.io/rb/paratrooper.png)](http://badge.fury.io/rb/paratrooper)
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)

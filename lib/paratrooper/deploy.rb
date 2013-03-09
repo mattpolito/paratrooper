@@ -1,6 +1,7 @@
 require 'paratrooper/heroku_wrapper'
 require 'paratrooper/default_formatter'
 require 'paratrooper/system_caller'
+require 'paratrooper/callbacks'
 
 module Paratrooper
 
@@ -131,5 +132,9 @@ module Paratrooper
     def system_call(call)
       system_caller.execute(call)
     end
+
+    # Add callback to default actions for deploy
+    #
+    include Callbacks
   end
 end

@@ -1,8 +1,8 @@
 require 'spec_helper'
-require 'paratrooper/default_formatter'
+require 'paratrooper/notifiers/screen_notifier'
 require 'stringio'
 
-describe Paratrooper::DefaultFormatter do
+describe Paratrooper::Notifiers::ScreenNotifier do
   let(:formatter) { described_class.new(output_stub) }
   let(:output_stub) { StringIO.new }
 

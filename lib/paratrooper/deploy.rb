@@ -113,6 +113,7 @@ module Paratrooper
     #
     # Alias: #deploy
     def default_deploy
+      setup
       activate_maintenance_mode
       update_repo_tag
       push_repo
@@ -120,6 +121,7 @@ module Paratrooper
       app_restart
       deactivate_maintenance_mode
       warm_instance
+      teardown
     end
     alias_method :deploy, :default_deploy
 

@@ -11,5 +11,7 @@ module Paratrooper
     def run_migrations(options = {}); end
     def app_restart(options = {}); end
     def warm_instance(options = {}); end
+    def setup(options = {}); end
+    def teardown(options = {}); end
   end
 end

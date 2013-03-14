@@ -71,7 +71,7 @@ This method works via a local Netrc file handled via the [Heroku Toolbelt][] and
 
 By providing tag options for Paratrooper, your code can be tagged and deployed from various reference points.
 
-## Staging example
+### Staging example
 ```ruby
   Paratrooper::Deploy.new("staging-app",
     tag: 'staging'
@@ -79,14 +79,14 @@ By providing tag options for Paratrooper, your code can be tagged and deployed f
 ```
 This will create/update a `staging` git tag at `HEAD`.
 
-## Production example
+### Production example
 ```ruby
   Paratrooper::Deploy.new("amazing-production-app",
     tag: 'production',
     match_tag_to: 'staging'
   )
 ```
-This will create/update a `production` git tag at `staging` and deploys the `production` tag.
+This will create/update a `production` git tag at `staging` and deploy the `production` tag.
 
 ## Sensible Default Deployment
 
@@ -102,7 +102,7 @@ This will perform the following tasks:
 * Deactivate maintenance mode
 * Warm application instance
 
-## Example Usage
+### Example Usage
 
 ```ruby
 require 'paratrooper'
@@ -133,12 +133,12 @@ end
 
 Our default deploy gets us most of the way, but maybe it's not for you--we've
 got you covered. Every deployment method sends a notification that can be
-captured and used in almost many way you can imagine.
+captured and used in almost any way you can imagine.
 
 For example, say you want to let [New Relic][] know that you are deploying and
 to disable your application monitoring.
 
-## Example Usage
+### Example Usage
 
 ```ruby
 # Gemfile
@@ -163,7 +163,7 @@ end
 ```
 
 * The `ScreenNotifier` is added by default so when you override the `notifiers`
-  option you need to manually add it in to continue receiving screen output.
+  option you need to manually add it to continue receiving screen output.
 
 To make your own notifier, take a look at [`Paratrooper::Notifier`][] to see
 what methods are available for override.

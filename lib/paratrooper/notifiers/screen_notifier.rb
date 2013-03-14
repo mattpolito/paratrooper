@@ -1,10 +1,10 @@
 require 'paratrooper/notifier'
 
 module Paratrooper
-
-  # Public: Notifier used as default for outputting messages to screen.
-  #
   module Notifiers
+
+    # Public: Default notifier for outputting messages to screen.
+    #
     class ScreenNotifier < Notifier
       attr_reader :output
 
@@ -15,7 +15,7 @@ module Paratrooper
         @output = output
       end
 
-      # Private: Displays message with decoration
+      # Public: Displays message with decoration
       #
       # message - String message to be displayed
       #
@@ -35,11 +35,11 @@ module Paratrooper
         output.puts
       end
 
-      def activate_maintenance_mode(options={})
+      def activate_maintenance_mode(options = {})
         display("Activating Maintenance Mode")
       end
 
-      def deactivate_maintenance_mode(options={})
+      def deactivate_maintenance_mode(options = {})
         display("Deactivating Maintenance Mode")
       end
 

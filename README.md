@@ -44,15 +44,15 @@ Paratrooper::Deploy.new('amazing-app', tag: 'staging')
 
 ## Authentication
 
-You can authenticate your Heroku account in a few different ways:
+You can authenticate your Heroku account in a few ways:
 
-* Providing API Key
+* Provide an API Key
 
 ```ruby
 Paratrooper::Deploy.new('app', api_key: 'API_KEY')
 ```
 
-* Setting an environment variable
+* Set an environment variable
 
 ```ruby
 ENV['HEROKU_API_KEY'] = 'API_KEY'
@@ -65,11 +65,11 @@ Paratrooper::Deploy.new('app')
 Paratrooper::Deploy.new('app')
 ```
 
-This method works via a local Netrc file which is handled via the [Heroku Toolbelt][] and is the default and preferred method of providing your authentication key.
+This method works via a local Netrc file handled via the [Heroku Toolbelt][] and is the default and preferred method for providing authentication keys.
 
 ## Tag Management
 
-By providing tag options into Paratrooper, your code can be tagged and deployed from different reference points.
+By providing tag options for Paratrooper, your code can be tagged and deployed from various reference points.
 
 ### Staging example
 ```ruby
@@ -77,7 +77,7 @@ By providing tag options into Paratrooper, your code can be tagged and deployed 
     tag: 'staging'
   )
 ```
-This will create/update a `staging` git tag at `HEAD`
+This will create/update a `staging` git tag at `HEAD`.
 
 ### Production example
 ```ruby
@@ -86,15 +86,15 @@ This will create/update a `staging` git tag at `HEAD`
     match_tag_to: 'staging'
   )
 ```
-This will create/update a `production` git tag at `staging` and deploys the `production` tag
+This will create/update a `production` git tag at `staging` and deploy the `production` tag.
 
 ## Sensible Default Deployment
 
-You can use the objects methods any way you'd like, but we've provided a sensible default at `Paratrooper#deploy`
+You can use the object's methods any way you'd like, but we've provided a sensible default at `Paratrooper#deploy`.
 
 This will perform the following tasks:
 
-* Activating maintenance mode
+* Activate maintenance mode
 * Create or update a git tag (if provided)
 * Push changes to Heroku
 * Run database migrations
@@ -131,9 +131,9 @@ end
 
 ## Bucking the Norm
 
-Our default deploy gets us most of the way, but maybe it's not for you. We've
+Our default deploy gets us most of the way, but maybe it's not for you--we've
 got you covered. Every deployment method sends a notification that can be
-captured and used in most any way you can think of.
+captured and used in almost any way you can imagine.
 
 For example, say you want to let [New Relic][] know that you are deploying and
 to disable your application monitoring.
@@ -163,23 +163,23 @@ end
 ```
 
 * The `ScreenNotifier` is added by default so when you override the `notifiers`
-  option you need to manually add it in to continue getting screen output.
+  option you need to manually add it to continue receiving screen output.
 
 To make your own notifier, take a look at [`Paratrooper::Notifier`][] to see
-what methods are available to be overridden.
+what methods are available for override.
 
 
 ## Contributing
 
 1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+2. Create your feature branch (`git checkout -b my-new-feature`).
+3. Commit your changes (`git commit -am 'Add some feature'`).
+4. Push to the branch (`git push origin my-new-feature`).
+5. Create new Pull Request.
 
 ## Thanks
 
-* [Rye Mason][] for the fantastic heading image
+* [Rye Mason][] for the fantastic heading image.
 
 [Heroku]: http://heroku.com
 [Heroku Toolbelt]: http://toolbelt.heroku.com

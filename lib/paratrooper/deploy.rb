@@ -84,6 +84,15 @@ module Paratrooper
       notify(:run_migrations)
       system_call "heroku run rake db:migrate --app #{app_name}"
     end
+    
+    # Public: Precompiles assets on your application.
+    #         This is usually not necessary, as it is done 
+    #         automatically when pushing to heroku.
+    #
+    def precompile_assets
+      notify(:precompile_assets)
+      system_call "heroku run rake assets:precompile --app #{app_name}"
+    end
 
     # Public: Restarts application on Heroku.
     #

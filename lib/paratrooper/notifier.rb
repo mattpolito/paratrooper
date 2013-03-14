@@ -19,6 +19,7 @@ module Paratrooper
     def update_repo_tag(options = {}); end
     def push_repo(options = {}); end
     def run_migrations(options = {}); end
+    def precompile_assets(options = {}); end
     def app_restart(options = {}); end
     def warm_instance(options = {}); end
     def teardown(options = {}); end

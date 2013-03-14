@@ -160,6 +160,23 @@ describe Paratrooper::Deploy do
       deployer.run_migrations
     end
   end
+  
+  describe "#precompile_assets" do
+    before do
+      system_caller.stub(:execute)
+    end
+
+    it 'sends notification' do
+      deployer.should_receive(:notify).with(:precompile_assets).once
+      deployer.precompile_assets
+    end
+
+    it 'precompiles assets' do
+      expected_call = 'heroku run rake assets:precompile --app app'
+      system_caller.should_receive(:execute).with(expected_call)
+      deployer.precompile_assets
+    end
+  end
 
   describe "#app_restart" do
     it 'sends notification' do

@@ -131,13 +131,20 @@ end
 
 ## Bucking the Norm
 
-Our default deploy gets us most of the way, but maybe it's not for you. We've got you covered. Every instance of Paratrooper will have access to all of the included methods so you can build your custom deploy.
+Our default deploy gets us most of the way, but maybe it's not for you. We've
+got you covered. Every deployment method sends a notification that can be
+captured and used in most any way you can think of.
 
-For example, say you want to let [New Relic][] know that you are deploying and to disable your heartbeart.
+For example, say you want to let [New Relic][] know that you are deploying and
+to disable your application monitoring.
 
 ### Example Usage
 
 ```ruby
+# Gemfile
+gem 'paratrooper-newrelic'
+
+# lib/tasks/deploy.rake
 require 'paratrooper'
 
 namespace :deploy do
@@ -145,27 +152,22 @@ namespace :deploy do
   task :production do
     deployment = Paratrooper::Deploy.new("amazing-production-app",
       tag: 'production',
-      match_tag_to: 'staging'
+      match_tag_to: 'staging',
+      notifiers: [
+        Paratrooper::Notifers::ScreenNotifier.new,
+        Paratrooper::Newrelic::Notifier.new('api_key', 'account_id', 'application_id')
+      ]
     )
-
-    %x[curl https://heroku.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/disable -X POST -H "X-Api-Key: API_KEY"]
-
-    deployment.activate_maintenance_mode
-    deployment.update_repo_tag
-    deployment.push_repo
-    deployment.run_migrations
-    deployment.app_restart
-    deployment.deactivate_maintenance_mode
-    deployment.warm_instance
-
-    %x[curl https://heroku.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/enable -X POST -H "X-Api-Key: API_KEY"]
   end
 end
 ```
 
-## Nice to haves
+* The `ScreenNotifier` is added by default so when you override the `notifiers`
+  option you need to manually add it in to continue getting screen output.
 
-* Send [New Relic][] a notification to toggle heartbeat during deploy
+To make your own notifier, take a look at [`Paratrooper::Notifier`][] to see
+what methods are available to be overridden.
+
 
 ## Contributing
 
@@ -183,3 +185,4 @@ end
 [Heroku Toolbelt]: http://toolbelt.heroku.com
 [New Relic]: http://newrelic.com
 [Rye Mason]: https://github.com/ryenotbread
+[`Paratrooper::Notifier`]: https://github.com/mattpolito/paratrooper/blob/master/lib/paratrooper/notifier.rb

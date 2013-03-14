@@ -9,7 +9,7 @@ describe Paratrooper::Deploy do
   let(:default_options) do
     {
       heroku: heroku,
-      formatter: formatter,
+      notifiers: [],
       system_caller: system_caller
     }
   end
@@ -22,7 +22,6 @@ describe Paratrooper::Deploy do
       app_maintenance_off: true,
     )
   end
-  let(:formatter) { double(:formatter, puts: '') }
   let(:system_caller) { double(:system_caller) }
   let(:domain_response) do
     double(:domain_response, body: [{'domain' => 'application_url'}])
@@ -46,26 +45,19 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "accepts :formatter" do
-      let(:options) { { formatter: formatter } }
-      let(:formatter) { double(:formatter) }
+    context "accepts :notifiers" do
+      let(:options) { { notifiers: [notifiers] } }
+      let(:notifiers) { double(:notifier) }
 
-      it "and responds to #formatter" do
-        expect(deployer.formatter).to eq(formatter)
+      it "and responds to #notifiers" do
+        expect(deployer.notifiers).to eq([notifiers])
       end
     end
   end
 
   describe "#activate_maintenance_mode" do
-    let(:options) { { formatter: formatter } }
-    let(:formatter) { double(:formatter, puts: true) }
-
-    before do
-      formatter.stub(:display)
-    end
-
-    it "displays message" do
-      formatter.should_receive(:display).with('Activating Maintenance Mode')
+    it 'sends notification' do
+      deployer.should_receive(:notify).with(:activate_maintenance_mode).once
       deployer.activate_maintenance_mode
     end
 
@@ -76,12 +68,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#deactivate_maintenance_mode" do
-    before do
-      formatter.stub(:display)
-    end
-
-    it "displays message" do
-      formatter.should_receive(:display).with('Deactivating Maintenance Mode')
+    it 'sends notification' do
+      deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
       deployer.deactivate_maintenance_mode
     end
 
@@ -97,11 +85,10 @@ describe Paratrooper::Deploy do
 
       before do
         system_caller.stub(:execute)
-        formatter.stub(:display)
       end
 
-      it 'displays message' do
-        formatter.should_receive(:display).with('Updating Repo Tag: awesome')
+      it 'sends notification' do
+        deployer.should_receive(:notify).with(:update_repo_tag).once
         deployer.update_repo_tag
       end
 
@@ -142,11 +129,11 @@ describe Paratrooper::Deploy do
   describe "#push_repo" do
     before do
       system_caller.stub(:execute)
-      formatter.stub(:display)
     end
 
-    it 'displays message' do
-      formatter.should_receive(:display).with('Pushing master to Heroku')
+    it 'sends notification' do
+      deployer.should_receive(:notify)
+        .with(:push_repo, reference_point: 'master').once
       deployer.push_repo
     end
 
@@ -160,11 +147,10 @@ describe Paratrooper::Deploy do
   describe "#run_migrations" do
     before do
       system_caller.stub(:execute)
-      formatter.stub(:display)
     end
 
-    it 'displays message' do
-      formatter.should_receive(:display).with('Running database migrations')
+    it 'sends notification' do
+      deployer.should_receive(:notify).with(:run_migrations).once
       deployer.run_migrations
     end
 
@@ -176,12 +162,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#app_restart" do
-    before do
-      formatter.stub(:display)
-    end
-
-    it 'displays message' do
-      formatter.should_receive(:display).with('Restarting application')
+    it 'sends notification' do
+      deployer.should_receive(:notify).with(:app_restart).once
       deployer.app_restart
     end
 
@@ -194,12 +176,10 @@ describe Paratrooper::Deploy do
   describe "#warm_instance" do
     before do
       system_caller.stub(:execute)
-      formatter.stub(:display)
     end
 
-    it 'displays message' do
-      expected_notice = 'Accessing application_url to warm up your application'
-      formatter.should_receive(:display).with(expected_notice)
+    it 'sends notification' do
+      deployer.should_receive(:notify).with(:warm_instance).once
       deployer.warm_instance(0)
     end
 

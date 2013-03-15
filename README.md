@@ -154,7 +154,7 @@ namespace :deploy do
       tag: 'production',
       match_tag_to: 'staging',
       notifiers: [
-        Paratrooper::Notifers::ScreenNotifier.new,
+        Paratrooper::Notifiers::ScreenNotifier.new,
         Paratrooper::Newrelic::Notifier.new('api_key', 'account_id', 'application_id')
       ]
     )

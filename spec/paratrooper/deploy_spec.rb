@@ -111,7 +111,7 @@ describe Paratrooper::Deploy do
       end
 
       it 'pushes git tag' do
-        system_caller.should_receive(:execute).with('git push -f origin awesome')
+        system_caller.should_receive(:execute).with('git push -f git@heroku.com:app.git awesome')
         deployer.update_repo_tag
       end
     end

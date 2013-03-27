@@ -14,8 +14,8 @@ module Paratrooper
     #
     # app_name - A String naming the Heroku application to be interacted with.
     # options  - The Hash options is used to provide additional functionality.
-    #            :notifiers     - Array of objects responsible for handling
-    #                             notifications (optional).
+    #            :notifiers     - Array of objects interested in being notified
+    #                             of steps in deployment process (optional).
     #            :heroku        - Object wrapper around heroku-api (optional).
     #            :tag           - String name to be used as a git reference
     #                             point (optional).

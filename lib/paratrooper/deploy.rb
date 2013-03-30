@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag
+      :match_tag, :callbacks
 
     # Public: Initializes a Deploy
     #
@@ -30,14 +30,27 @@ module Paratrooper
       @tag_name      = options[:tag]
       @match_tag     = options[:match_tag_to] || 'master'
       @system_caller = options[:system_caller] || SystemCaller.new
+      @callbacks     = options[:callbacks] || []
+    end
+    
+    def before(step, options={})
+      callbacks.each do |callback|
+        result = callback.run(step, default_payload.merge(options))
+        return if result === false
+      end
+      yield if block_given?
     end
 
     def setup
-      notify(:setup)
+      before(:setup) do
+        notify(:setup)
+      end
     end
 
     def teardown
-      notify(:teardown)
+      before(:teardown) do
+        notify(:teardown)
+      end
     end
 
     def notify(step, options={})
@@ -49,24 +62,30 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      notify(:activate_maintenance_mode)
-      heroku.app_maintenance_on
+      before(:activate_maintenance_mode) do
+        notify(:activate_maintenance_mode)
+        heroku.app_maintenance_on
+      end
     end
 
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
-      notify(:deactivate_maintenance_mode)
-      heroku.app_maintenance_off
+      before(:deactivate_maintenance_mode) do
+        notify(:deactivate_maintenance_mode)
+        heroku.app_maintenance_off
+      end
     end
 
     # Public: Creates a git tag and pushes it to repository.
     #
     def update_repo_tag
       unless tag_name.nil? || tag_name.empty?
-        notify(:update_repo_tag)
-        system_call "git tag #{tag_name} #{match_tag} -f"
-        system_call "git push -f #{git_remote} #{tag_name}"
+        before(:update_repo_tag) do
+          notify(:update_repo_tag)
+          system_call "git tag #{tag_name} #{match_tag} -f"
+          system_call "git push -f #{git_remote} #{tag_name}"
+        end
       end
     end
 
@@ -74,30 +93,38 @@ module Paratrooper
     #
     def push_repo
       reference_point = tag_name || 'master'
-      notify(:push_repo, reference_point: reference_point)
-      system_call "git push -f #{git_remote} #{reference_point}:master"
+      before(:push_repo, reference_point: reference_point) do
+        notify(:push_repo, reference_point: reference_point)
+        system_call "git push -f #{git_remote} #{reference_point}:master"
+      end
     end
 
     # Public: Runs rails database migrations on your application.
     #
     def run_migrations
-      notify(:run_migrations)
-      system_call "heroku run rake db:migrate --app #{app_name}"
+      before(:run_migrations) do
+        notify(:run_migrations)
+        system_call "heroku run rake db:migrate --app #{app_name}"
+      end
     end
 
     # Public: Restarts application on Heroku.
     #
     def app_restart
-      notify(:app_restart)
-      heroku.app_restart
+      before(:app_restart) do
+        notify(:app_restart)
+        heroku.app_restart
+      end
     end
 
     # Public: cURL for application URL to start your Heroku dyno.
     #
     def warm_instance(wait_time = 3)
-      sleep wait_time
-      notify(:warm_instance)
-      system_call "curl -Il http://#{app_url}"
+      before(:warm_instance) do
+        sleep wait_time
+        notify(:warm_instance)
+        system_call "curl -Il http://#{app_url}"
+      end
     end
 
     # Public: Execute common deploy steps.

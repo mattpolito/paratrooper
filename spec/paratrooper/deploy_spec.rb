@@ -10,6 +10,7 @@ describe Paratrooper::Deploy do
     {
       heroku: heroku,
       notifiers: [],
+      callbacks: [],
       system_caller: system_caller
     }
   end
@@ -53,9 +54,43 @@ describe Paratrooper::Deploy do
         expect(deployer.notifiers).to eq([notifiers])
       end
     end
+    
+    context "accepts :callbacks" do
+      let(:options) { { callbacks: [callbacks] } }
+      let(:callbacks) { double(:callback) }
+
+      it "and responds to #callbacks" do
+        expect(deployer.callbacks).to eq([callbacks])
+      end
+    end
+  end
+  
+  describe '#before' do
+    context 'when a callback returns false' do
+      let(:options) { { callbacks: [callback] } }
+      let(:callback) { double(:callback, run: false) }
+      
+      it 'does not yield to the block' do
+        expect{|b| deployer.before(:something, &b)}.not_to yield_control
+      end
+    end
+    
+    context 'when no callback returns false' do
+      let(:options) { { callbacks: [callback] } }
+      let(:callback) { double(:callback, run: true) }
+      
+      it 'yields to the block' do
+        expect{|b| deployer.before(:something, &b)}.to yield_control
+      end
+    end
   end
 
   describe "#activate_maintenance_mode" do
+    it 'runs before callbacks' do
+      deployer.should_receive(:before).with(:activate_maintenance_mode).once
+      deployer.activate_maintenance_mode
+    end
+    
     it 'sends notification' do
       deployer.should_receive(:notify).with(:activate_maintenance_mode).once
       deployer.activate_maintenance_mode
@@ -68,6 +103,11 @@ describe Paratrooper::Deploy do
   end
 
   describe "#deactivate_maintenance_mode" do
+    it 'runs before callbacks' do
+      deployer.should_receive(:before).with(:deactivate_maintenance_mode).once
+      deployer.deactivate_maintenance_mode
+    end
+    
     it 'sends notification' do
       deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
       deployer.deactivate_maintenance_mode
@@ -96,6 +136,11 @@ describe Paratrooper::Deploy do
         before do
           options.merge!(match_tag_to: 'deploy_this')
         end
+        
+        it 'runs before callbacks' do
+          deployer.should_receive(:before).with(:update_repo_tag).once
+          deployer.update_repo_tag
+        end
 
         it 'creates a git tag at deploy_tag reference point' do
           system_caller.should_receive(:execute).with('git tag awesome deploy_this -f')
@@ -123,12 +168,22 @@ describe Paratrooper::Deploy do
         system_caller.should_not_receive(:execute)
         deployer.update_repo_tag
       end
+      
+      it 'doesn\'t run before callbacks' do
+        deployer.should_not_receive(:before).with(:update_repo_tag)
+        deployer.update_repo_tag
+      end
     end
   end
 
   describe "#push_repo" do
     before do
       system_caller.stub(:execute)
+    end
+    
+    it 'runs before callbacks' do
+      deployer.should_receive(:before).with(:push_repo, reference_point: 'master').once
+      deployer.push_repo
     end
 
     it 'sends notification' do
@@ -149,6 +204,11 @@ describe Paratrooper::Deploy do
       system_caller.stub(:execute)
     end
 
+    it 'runs before callbacks' do
+      deployer.should_receive(:before).with(:run_migrations).once
+      deployer.run_migrations
+    end
+    
     it 'sends notification' do
       deployer.should_receive(:notify).with(:run_migrations).once
       deployer.run_migrations
@@ -162,6 +222,11 @@ describe Paratrooper::Deploy do
   end
 
   describe "#app_restart" do
+    it 'runs before callbacks' do
+      deployer.should_receive(:before).with(:app_restart).once
+      deployer.app_restart
+    end
+    
     it 'sends notification' do
       deployer.should_receive(:notify).with(:app_restart).once
       deployer.app_restart
@@ -178,6 +243,11 @@ describe Paratrooper::Deploy do
       system_caller.stub(:execute)
     end
 
+    it 'runs before callbacks' do
+      deployer.should_receive(:before).with(:warm_instance).once
+      deployer.warm_instance
+    end
+    
     it 'sends notification' do
       deployer.should_receive(:notify).with(:warm_instance).once
       deployer.warm_instance(0)

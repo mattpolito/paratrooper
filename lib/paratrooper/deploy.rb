@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag
+      :match_tag, :protocol
 
     # Public: Initializes a Deploy
     #
@@ -30,6 +30,7 @@ module Paratrooper
       @tag_name      = options[:tag]
       @match_tag     = options[:match_tag_to] || 'master'
       @system_caller = options[:system_caller] || SystemCaller.new
+      @protocol      = options[:protocol] || 'http'
     end
 
     def setup
@@ -97,7 +98,7 @@ module Paratrooper
     def warm_instance(wait_time = 3)
       sleep wait_time
       notify(:warm_instance)
-      system_call "curl -Il http://#{app_url}"
+      system_call "curl -Il #{protocol}://#{app_url}"
     end
 
     # Public: Execute common deploy steps.

@@ -23,6 +23,8 @@ module Paratrooper
     #                             :tag to (optional).
     #            :system_caller - Object responsible for calling system
     #                             commands (optional).
+    #            :protocol      - String web protocol to be used when pinging
+    #                             application (optional, default: 'http').
     def initialize(app_name, options = {})
       @app_name      = app_name
       @notifiers     = options[:notifiers] || [Notifiers::ScreenNotifier.new]

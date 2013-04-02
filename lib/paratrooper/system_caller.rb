@@ -3,5 +3,9 @@ module Paratrooper
     def execute(call)
       system(call)
     end
+    
+    def run(call)
+      `#{call}`
+    end
   end
 end

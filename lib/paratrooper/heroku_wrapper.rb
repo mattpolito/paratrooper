@@ -27,6 +27,10 @@ module Paratrooper
     def app_url
       app_domain_name
     end
+    
+    def run_migrations
+      heroku_api.post_ps(app_name, 'rake db:migrate')
+    end
 
     private
     def app_domain_name

@@ -85,7 +85,7 @@ module Paratrooper
     #
     def run_migrations
       notify(:run_migrations)
-      system_call "heroku run rake db:migrate --app #{app_name}"
+      heroku.run_migrations
     end
 
     # Public: Restarts application on Heroku.

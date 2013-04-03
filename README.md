@@ -132,13 +132,71 @@ end
 ## Bucking the Norm
 
 Our default deploy gets us most of the way, but maybe it's not for you--we've
-got you covered. Every deployment method sends a notification that can be
-captured and used in almost any way you can imagine.
+got you covered. Every deployment method triggers callbacks that can be used
+in almost any way you can imagine.
 
-For example, say you want to let [New Relic][] know that you are deploying and
-to disable your application monitoring.
+Additionally, a notification system sits on top of the callbacks as a
+convenience for cases when you just want to know something happened but not
+affect the flow of the deployment.
 
-### Example Usage
+### Callbacks
+
+Paratrooper leverages ActiveSupport::Callbacks so hooking into the callback
+system should be very familiar for anyone that has worked with Rails before.
+
+Callbacks can be added in two different ways.
+
+* As options to Paratrooper::Deploy:
+  ```ruby
+  # lib/tasks/deploy.rake
+  require 'paratrooper'
+  
+  class MyCallback
+    def before_run_migrations
+      # Do something fancy and return false to skip migrations
+    end
+  end
+
+  namespace :deploy do
+    desc 'Deploy app in production environment'
+    task :production do
+      deployment = Paratrooper::Deploy.new("amazing-production-app",
+        tag: 'production',
+        match_tag_to: 'staging',
+        callbacks: [MyCallback.new]
+      )
+    end
+  end
+  ```
+* By subclassing Paratrooper::Deploy and using the callback class methods:
+  ```ruby
+  # lib/tasks/deploy.rake
+  require 'paratrooper'
+  
+  class MyDeployer < Paratrooper::Deploy
+    before_run_migrations :check_migrations
+    
+    def check_migrations
+      # Again with the fancy checking
+      false # To skip migrations
+    end
+  end
+
+  namespace :deploy do
+    desc 'Deploy app in production environment'
+    task :production do
+      deployment = MyDeployer.new("amazing-production-app",
+        tag: 'production',
+        match_tag_to: 'staging'
+      )
+    end
+  end
+  ```
+
+### Notifiers
+
+As an example of a notifier, say you want to let [New Relic][] know that you
+are deploying and to disable your application monitoring.
 
 ```ruby
 # Gemfile
@@ -168,6 +226,41 @@ end
 To make your own notifier, take a look at [`Paratrooper::Notifier`][] to see
 what methods are available for override.
 
+## Smart Deployments
+
+Paratrooper comes with a built-in PendingMigrationsCallback class that can be
+added to your Paratrooper::Deploy via the callbacks option.  This callback
+class will use git diffs to determine if there are migrations that will need
+to be run during your deploy or not.
+
+If there are no migrations to run it will intelligently skip the following
+steps:
+
+* activate_maintenance_mode
+* deactivate_maintenance_mode
+* run_migrations
+* app_restart
+
+### Example
+
+To inject the smart deployment callbacks:
+
+```ruby
+# lib/tasks/deploy.rake
+require 'paratrooper'
+require 'paratrooper/callbacks/pending_migrations_callback'
+
+namespace :deploy do
+  desc 'Deploy app in production environment'
+  task :production do
+    deployment = Paratrooper::Deploy.new("amazing-production-app",
+      tag: 'production',
+      match_tag_to: 'staging',
+      callbacks: [PendingMigrationsCallback.new]
+    )
+  end
+end
+```
 
 ## Contributing
 

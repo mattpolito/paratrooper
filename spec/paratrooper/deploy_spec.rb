@@ -10,6 +10,7 @@ describe Paratrooper::Deploy do
     {
       heroku: heroku,
       notifiers: [],
+      callbacks: [],
       system_caller: system_caller
     }
   end
@@ -61,11 +62,20 @@ describe Paratrooper::Deploy do
         expect(deployer.protocol).to eq('https')
       end
     end
+    
+    context "accepts :callbacks" do
+      let(:options) { { callbacks: [callbacks] } }
+      let(:callbacks) { double(:callback) }
+    
+      it "and responds to #callbacks" do
+        expect(deployer.callbacks).to eq([callbacks])
+      end
+    end
   end
 
   describe "#activate_maintenance_mode" do
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:activate_maintenance_mode).once
+    it 'runs callbacks' do
+      deployer.should_receive(:run_callbacks).with(:activate_maintenance_mode).once
       deployer.activate_maintenance_mode
     end
 
@@ -76,8 +86,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#deactivate_maintenance_mode" do
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
+    it 'runs callbacks' do
+      deployer.should_receive(:run_callbacks).with(:deactivate_maintenance_mode).once
       deployer.deactivate_maintenance_mode
     end
 
@@ -95,8 +105,8 @@ describe Paratrooper::Deploy do
         system_caller.stub(:execute)
       end
 
-      it 'sends notification' do
-        deployer.should_receive(:notify).with(:update_repo_tag).once
+      it 'runs callbacks' do
+        deployer.should_receive(:run_callbacks).with(:update_repo_tag).once
         deployer.update_repo_tag
       end
 
@@ -139,9 +149,8 @@ describe Paratrooper::Deploy do
       system_caller.stub(:execute)
     end
 
-    it 'sends notification' do
-      deployer.should_receive(:notify)
-        .with(:push_repo, reference_point: 'master').once
+    it 'runs callbacks' do
+      deployer.should_receive(:run_callbacks).with(:push_repo).once
       deployer.push_repo
     end
 
@@ -157,8 +166,8 @@ describe Paratrooper::Deploy do
       system_caller.stub(:execute)
     end
 
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:run_migrations).once
+    it 'runs callbacks' do
+      deployer.should_receive(:run_callbacks).with(:run_migrations).once
       deployer.run_migrations
     end
 
@@ -170,8 +179,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#app_restart" do
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:app_restart).once
+    it 'runs callbacks' do
+      deployer.should_receive(:run_callbacks).with(:app_restart).once
       deployer.app_restart
     end
 
@@ -186,8 +195,8 @@ describe Paratrooper::Deploy do
       system_caller.stub(:execute)
     end
 
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:warm_instance).once
+    it 'runs callbacks' do
+      deployer.should_receive(:run_callbacks).with(:warm_instance).once
       deployer.warm_instance(0)
     end
 

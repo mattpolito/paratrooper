@@ -1,18 +1,29 @@
+require 'paratrooper/callbacks'
+
 module Paratrooper
 
-  # Public: Shell object with methods to be overridden by other notifiers
+  # Public: Shell object with callback implementations that call
+  # the notifier methods.
   #
   # All notifiers should inherit from this class
   #
   class Notifier
-    def notify(step_name, options = {})
-      self.send(step_name, options)
+    # Set up before callbacks for all available callback
+    # methods which force Notifier classes to behave like
+    # existing notifiers.  Notifiers cannot halt the
+    # execution by returning false because the callbacks
+    # are defined here and always return true.
+    Paratrooper::Callbacks::METHODS.each do |method|
+      define_method("before_#{method}") do |deployer|
+        send(method, deployer.send(:default_payload))
+        return true
+      end
     end
-
+    
     #
     # To create your own notifier override the following methods.
     #
-
+    
     def setup(options = {}); end
     def activate_maintenance_mode(options = {}); end
     def deactivate_maintenance_mode(options = {}); end

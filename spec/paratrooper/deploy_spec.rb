@@ -20,6 +20,7 @@ describe Paratrooper::Deploy do
       app_restart: true,
       app_maintenance_on: true,
       app_maintenance_off: true,
+      run_migrations: true
     )
   end
   let(:system_caller) { double(:system_caller) }
@@ -164,7 +165,7 @@ describe Paratrooper::Deploy do
 
     it 'pushes repo to heroku' do
       expected_call = 'heroku run rake db:migrate --app app'
-      system_caller.should_receive(:execute).with(expected_call)
+      heroku.should_receive(:run_migrations)
       deployer.run_migrations
     end
   end

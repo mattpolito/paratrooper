@@ -164,7 +164,6 @@ describe Paratrooper::Deploy do
     end
 
     it 'pushes repo to heroku' do
-      expected_call = 'heroku run rake db:migrate --app app'
       heroku.should_receive(:run_migrations)
       deployer.run_migrations
     end

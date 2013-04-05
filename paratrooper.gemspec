@@ -21,5 +21,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec', '~> 2.12'
   gem.add_development_dependency 'pry'
   gem.add_dependency 'heroku-api', '~> 0.3'
+  gem.add_dependency 'rendezvous', "~> 0.0.1"
   gem.add_dependency 'netrc', '~> 0.7'
 end

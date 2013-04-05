@@ -61,6 +61,21 @@ describe Paratrooper::HerokuWrapper do
       wrapper.app_maintenance_on
     end
   end
+  
+  describe '#run_migrations' do
+    it 'calls into the heroku api' do
+      heroku_api.should_receive(:post_ps).with(app_name, 'rake db:migrate', attach: 'true').and_return(double(body: ''))
+      Rendezvous.stub(start: nil)
+      wrapper.run_migrations
+    end
+    
+    it 'uses waits for db migrations to run using rendezvous' do
+      data = { 'rendezvous_url' => 'the_url' }
+      heroku_api.stub_chain(:post_ps, :body).and_return(data)
+      Rendezvous.should_receive(:start).with(:url => data['rendezvous_url'])
+      wrapper.run_migrations
+    end
+  end
 
   describe '#app_url' do
     context 'when custom domains are available' do

@@ -7,7 +7,7 @@ module Paratrooper
   # Public: Entry point into the library.
   #
   class Deploy
-    attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
+    attr_reader :app_name, :system_caller, :heroku, :tag_name,
       :match_tag, :protocol
 
     # Public: Initializes a Deploy
@@ -15,6 +15,7 @@ module Paratrooper
     # app_name - A String naming the Heroku application to be interacted with.
     # options  - The Hash options is used to provide additional functionality.
     #            :notifiers     - Array of objects interested in being notified
+    #            :notifier      - object interested in being notified
     #                             of steps in deployment process (optional).
     #            :heroku        - Object wrapper around heroku-api (optional).
     #            :tag           - String name to be used as a git reference
@@ -27,7 +28,8 @@ module Paratrooper
     #                             application (optional, default: 'http').
     def initialize(app_name, options = {})
       @app_name      = app_name
-      @notifiers     = options[:notifiers] || [Notifiers::ScreenNotifier.new]
+      @notifiers     = options[:notifiers]
+      @notifier      = options[:notifier] || [Notifiers::ScreenNotifier.new]
       @heroku        = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name      = options[:tag]
       @match_tag     = options[:match_tag_to] || 'master'
@@ -47,6 +49,10 @@ module Paratrooper
       notifiers.each do |notifier|
         notifier.notify(step, default_payload.merge(options))
       end
+    end
+
+    def notifiers
+      @notifiers ||= [@notifier]
     end
 
     # Public: Activates Heroku maintenance mode.

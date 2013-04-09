@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :host
+      :match_tag, :protocol, :ssh_host
 
     # Public: Initializes a Deploy
     #
@@ -25,8 +25,8 @@ module Paratrooper
     #                             commands (optional).
     #            :protocol      - String web protocol to be used when pinging
     #                             application (optional, default: 'http').
-    #            :host          - String host to be used in git URL (optional,
-    #                             default: 'heroku.com').
+    #            :ssh_host      - String SSH host name to be used in git URL
+    #                             (optional, default: 'heroku.com').
     def initialize(app_name, options = {})
       @app_name      = app_name
       @notifiers     = options[:notifiers] || [Notifiers::ScreenNotifier.new]
@@ -35,7 +35,7 @@ module Paratrooper
       @match_tag     = options[:match_tag_to] || 'master'
       @system_caller = options[:system_caller] || SystemCaller.new
       @protocol      = options[:protocol] || 'http'
-      @host          = options[:host] || 'heroku.com'
+      @ssh_host      = options[:ssh_host] || 'heroku.com'
     end
 
     def setup
@@ -147,7 +147,7 @@ module Paratrooper
     end
 
     def git_remote
-      "git@#{host}:#{app_name}.git"
+      "git@#{ssh_host}:#{app_name}.git"
     end
 
     # Internal: Calls commands meant to go to system

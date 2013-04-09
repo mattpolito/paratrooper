@@ -63,11 +63,11 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "accepts :host" do
-      let(:options) { { host: 'host_name' } }
+    context "accepts :ssh_host" do
+      let(:options) { { ssh_host: 'host_name' } }
 
       it "and responds to #notifiers" do
-        expect(deployer.host).to eq('host_name')
+        expect(deployer.ssh_host).to eq('host_name')
       end
     end
   end

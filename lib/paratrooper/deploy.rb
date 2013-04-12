@@ -8,34 +8,35 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :ssh_host
+      :match_tag, :protocol, :deployment_host
 
     # Public: Initializes a Deploy
     #
     # app_name - A String naming the Heroku application to be interacted with.
     # options  - The Hash options is used to provide additional functionality.
-    #            :notifiers     - Array of objects interested in being notified
-    #                             of steps in deployment process (optional).
-    #            :heroku        - Object wrapper around heroku-api (optional).
-    #            :tag           - String name to be used as a git reference
-    #                             point (optional).
-    #            :match_tag_to  - String name of git reference point to match
-    #                             :tag to (optional).
-    #            :system_caller - Object responsible for calling system
-    #                             commands (optional).
-    #            :protocol      - String web protocol to be used when pinging
-    #                             application (optional, default: 'http').
-    #            :ssh_host      - String SSH host name to be used in git URL
-    #                             (optional, default: 'heroku.com').
+    #            :notifiers       - Array of objects interested in being
+    #                               notified of steps in deployment process
+    #                               (optional).
+    #            :heroku          - Object wrapper around heroku-api (optional).
+    #            :tag             - String name to be used as a git reference
+    #                               point (optional).
+    #            :match_tag_to    - String name of git reference point to match
+    #                               :tag to (optional).
+    #            :system_caller   - Object responsible for calling system
+    #                               commands (optional).
+    #            :protocol        - String web protocol to be used when pinging
+    #                               application (optional, default: 'http').
+    #            :deployment_host - String host name to be used in git URL
+    #                               (optional, default: 'heroku.com').
     def initialize(app_name, options = {})
-      @app_name      = app_name
-      @notifiers     = options[:notifiers] || [Notifiers::ScreenNotifier.new]
-      @heroku        = options[:heroku] || HerokuWrapper.new(app_name, options)
-      @tag_name      = options[:tag]
-      @match_tag     = options[:match_tag_to] || 'master'
-      @system_caller = options[:system_caller] || SystemCaller.new
-      @protocol      = options[:protocol] || 'http'
-      @ssh_host      = options[:ssh_host] || 'heroku.com'
+      @app_name        = app_name
+      @notifiers       = options[:notifiers] || [Notifiers::ScreenNotifier.new]
+      @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
+      @tag_name        = options[:tag]
+      @match_tag       = options[:match_tag_to] || 'master'
+      @system_caller   = options[:system_caller] || SystemCaller.new
+      @protocol        = options[:protocol] || 'http'
+      @deployment_host = options[:deployment_host] || 'heroku.com'
     end
 
     def setup
@@ -147,7 +148,7 @@ module Paratrooper
     end
 
     def git_remote
-      "git@#{ssh_host}:#{app_name}.git"
+      "git@#{deployment_host}:#{app_name}.git"
     end
 
     # Internal: Calls commands meant to go to system

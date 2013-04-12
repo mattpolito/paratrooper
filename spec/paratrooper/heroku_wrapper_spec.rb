@@ -10,10 +10,12 @@ describe Paratrooper::HerokuWrapper do
   let(:default_options) do
     {
       heroku_api: heroku_api,
-      key_extractor: double(:key_extractor, get_credentials: 'API_KEY')
+      key_extractor: double(:key_extractor, get_credentials: 'API_KEY'),
+      rendezvous: rendezvous
     }
   end
   let(:heroku_api) { double(:heroku_api) }
+  let(:rendezvous) { double(:rendezvous, start: nil) }
 
   describe '#api_key' do
     context 'when api_key is provided as an option' do
@@ -61,18 +63,17 @@ describe Paratrooper::HerokuWrapper do
       wrapper.app_maintenance_on
     end
   end
-  
+
   describe '#run_migrations' do
     it 'calls into the heroku api' do
       heroku_api.should_receive(:post_ps).with(app_name, 'rake db:migrate', attach: 'true').and_return(double(body: ''))
-      Rendezvous.stub(start: nil)
       wrapper.run_migrations
     end
-    
+
     it 'uses waits for db migrations to run using rendezvous' do
       data = { 'rendezvous_url' => 'the_url' }
       heroku_api.stub_chain(:post_ps, :body).and_return(data)
-      Rendezvous.should_receive(:start).with(:url => data['rendezvous_url'])
+      rendezvous.should_receive(:start).with(:url => data['rendezvous_url'])
       wrapper.run_migrations
     end
   end

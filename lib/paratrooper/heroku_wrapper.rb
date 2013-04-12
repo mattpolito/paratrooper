@@ -1,16 +1,16 @@
 require 'heroku-api'
 require 'paratrooper/local_api_key_extractor'
-require 'rendezvous'
 
 module Paratrooper
   class HerokuWrapper
-    attr_reader :api_key, :app_name, :heroku_api, :key_extractor
+    attr_reader :api_key, :app_name, :heroku_api, :key_extractor, :rendezvous
 
     def initialize(app_name, options = {})
       @app_name      = app_name
       @key_extractor = options[:key_extractor] || LocalApiKeyExtractor
       @api_key       = options[:api_key] || key_extractor.get_credentials
       @heroku_api    = options[:heroku_api] || Heroku::API.new(api_key: api_key)
+      @rendezvous    = options[:rendezvous] || Rendezvous
     end
 
     def app_restart
@@ -28,10 +28,10 @@ module Paratrooper
     def app_url
       app_domain_name
     end
-    
+
     def run_migrations
       data = heroku_api.post_ps(app_name, 'rake db:migrate', attach: 'true').body
-      Rendezvous.start(:url => data['rendezvous_url'])
+      rendezvous.start(:url => data['rendezvous_url'])
     end
 
     private

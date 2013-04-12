@@ -1,5 +1,6 @@
 require 'heroku-api'
 require 'paratrooper/local_api_key_extractor'
+require 'rendezvous'
 
 module Paratrooper
   class HerokuWrapper
@@ -27,6 +28,11 @@ module Paratrooper
 
     def app_url
       app_domain_name
+    end
+    
+    def run_migrations
+      data = heroku_api.post_ps(app_name, 'rake db:migrate', attach: 'true').body
+      Rendezvous.start(:url => data['rendezvous_url'])
     end
 
     def run_migrations

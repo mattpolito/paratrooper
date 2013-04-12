@@ -67,6 +67,20 @@ Paratrooper::Deploy.new('app')
 
 This method works via a local Netrc file handled via the [Heroku Toolbelt][] and is the default and preferred method for providing authentication keys.
 
+## Git SSH key configuration
+
+If you use multiple SSH keys for managing multiple accounts, for example in your `.ssh/config`, you can set the `ssh_host` option:
+
+```ruby
+Paratrooper::Deploy.new('app', ssh_host: 'HOST')
+```
+
+This also works if you're using the [heroku-accounts](https://github.com/ddollar/heroku-accounts) plugin:
+
+```ruby
+Paratrooper::Deploy.new('app', ssh_host: 'heroku.ACCOUNT_NAME')
+```
+
 ## Tag Management
 
 By providing tag options for Paratrooper, your code can be tagged and deployed from various reference points.

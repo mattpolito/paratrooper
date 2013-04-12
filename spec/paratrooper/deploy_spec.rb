@@ -54,12 +54,20 @@ describe Paratrooper::Deploy do
         expect(deployer.notifiers).to eq([notifiers])
       end
     end
-    
+
     context "accepts :protocol" do
       let(:options) { { protocol: 'https' } }
 
       it "and responds to #notifiers" do
         expect(deployer.protocol).to eq('https')
+      end
+    end
+
+    context "accepts :ssh_host" do
+      let(:options) { { ssh_host: 'host_name' } }
+
+      it "and responds to #notifiers" do
+        expect(deployer.ssh_host).to eq('host_name')
       end
     end
   end
@@ -196,10 +204,10 @@ describe Paratrooper::Deploy do
       system_caller.should_receive(:execute).with(expected_call)
       deployer.warm_instance(0)
     end
-    
+
     context 'with optional protocol' do
       let(:options) { { protocol: 'https' } }
-      
+
       it 'pings application url using the protocol' do
         expected_call = 'curl -Il https://application_url'
         system_caller.should_receive(:execute).with(expected_call)

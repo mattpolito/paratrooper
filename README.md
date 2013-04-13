@@ -162,6 +162,9 @@ namespace :deploy do
 end
 ```
 
+* If you are looking to only add one notifier simply use the 
+  notifier option in place of the notifiers option
+
 * The `ScreenNotifier` is added by default so when you override the `notifiers`
   option you need to manually add it to continue receiving screen output.
 

@@ -64,6 +64,18 @@ describe Paratrooper::Deploy do
     end
   end
 
+  describe "#notifiers" do
+    context "single notifers" do
+      let(:options) { { notifier: notifier, notifiers: nil } }
+      let(:notifier) { double(:notifier) }
+      
+
+      it "returns an array of notifiers" do
+        expect(deployer.notifiers).to eq([notifier])
+      end
+    end
+  end
+
   describe "#activate_maintenance_mode" do
     it 'sends notification' do
       deployer.should_receive(:notify).with(:activate_maintenance_mode).once

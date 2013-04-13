@@ -1,4 +1,5 @@
 require 'heroku-api'
+require 'rendezvous'
 require 'paratrooper/local_api_key_extractor'
 
 module Paratrooper

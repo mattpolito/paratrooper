@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :repo_host, :repo_name, :deployment_host
+      :match_tag, :protocol, :deployment_host
 
     # Public: Initializes a Deploy
     #
@@ -26,10 +26,6 @@ module Paratrooper
     #                               commands (optional).
     #            :protocol        - String web protocol to be used when pinging
     #                               application (optional, default: 'http').
-    #            :repo_host       - String host name of of git repository
-    #                               (optional, default: 'github.com').
-    #            :repo_name       - String repository name (optional,
-    #                               default: '#app_name).
     #            :deployment_host - String host name to be used in git URL
     #                               (optional, default: 'heroku.com').
     def initialize(app_name, options = {})
@@ -40,8 +36,6 @@ module Paratrooper
       @match_tag       = options[:match_tag_to] || 'master'
       @system_caller   = options[:system_caller] || SystemCaller.new
       @protocol        = options[:protocol] || 'http'
-      @repo_host       = options[:repo_host] || 'github.com'
-      @repo_name       = options[:repo_name] || app_name
       @deployment_host = options[:deployment_host] || 'heroku.com'
     end
 
@@ -79,7 +73,7 @@ module Paratrooper
       unless tag_name.nil? || tag_name.empty?
         notify(:update_repo_tag)
         system_call "git tag #{tag_name} #{match_tag} -f"
-        system_call "git push -f #{repo_remote} #{tag_name}"
+        system_call "git push -f origin #{tag_name}"
       end
     end
 
@@ -147,7 +141,6 @@ module Paratrooper
       {
         app_name: app_name,
         app_url: app_url,
-        repo_remote: repo_remote,
         deployment_remote: deployment_remote,
         tag_name: tag_name,
         match_tag: match_tag
@@ -160,10 +153,6 @@ module Paratrooper
 
     def deployment_remote
       git_remote(deployment_host, app_name)
-    end
-
-    def repo_remote
-      git_remote(repo_host, repo_name)
     end
 
     # Internal: Calls commands meant to go to system

@@ -71,8 +71,36 @@ describe Paratrooper::Deploy do
       end
     end
 
-      it "and responds to #protocol" do
-        expect(deployer.protocol).to eq('https')
+    describe "repo_host" do
+      context "accepts :repo_host" do
+        let(:options) { { repo_host: 'repo_host_name' } }
+
+        it "and responds to #repo_host" do
+          expect(deployer.repo_host).to eq('repo_host_name')
+        end
+      end
+
+      context "no value passed" do
+        it "and responds to #repo_host with default value" do
+          expect(deployer.repo_host).to eq('github.com')
+        end
+      end
+    end
+
+    describe "repo_name" do
+      context "accepts :repo_name" do
+        let(:options) { { repo_name: 'repo_name_name' } }
+
+        it "and responds to #repo_name" do
+          expect(deployer.repo_name).to eq('repo_name_name')
+        end
+      end
+
+      context "no value passed" do
+        let(:app_name) { 'REPO_MAN' }
+        it "and responds to #repo_name with default value" do
+          expect(deployer.repo_name).to eq('REPO_MAN')
+        end
       end
     end
 

@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :deployment_host
+      :match_tag, :protocol, :repo_host, :repo_name, :deployment_host
 
     # Public: Initializes a Deploy
     #
@@ -26,6 +26,10 @@ module Paratrooper
     #                               commands (optional).
     #            :protocol        - String web protocol to be used when pinging
     #                               application (optional, default: 'http').
+    #            :repo_host       - String host name of of git repository
+    #                               (optional, default: 'github.com').
+    #            :repo_name       - String repository name (optional,
+    #                               default: '#app_name).
     #            :deployment_host - String host name to be used in git URL
     #                               (optional, default: 'heroku.com').
     def initialize(app_name, options = {})
@@ -36,6 +40,8 @@ module Paratrooper
       @match_tag       = options[:match_tag_to] || 'master'
       @system_caller   = options[:system_caller] || SystemCaller.new
       @protocol        = options[:protocol] || 'http'
+      @repo_host       = options[:repo_host] || 'github.com'
+      @repo_name       = options[:repo_name] || app_name
       @deployment_host = options[:deployment_host] || 'heroku.com'
     end
 

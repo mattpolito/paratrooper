@@ -169,7 +169,8 @@ describe Paratrooper::Deploy do
       end
 
       it 'pushes git tag' do
-        system_caller.should_receive(:execute).with('git push -f git@heroku.com:app.git awesome')
+        expected = 'git push -f git@github.com:app.git awesome'
+        system_caller.should_receive(:execute).with(expected)
         deployer.update_repo_tag
       end
     end

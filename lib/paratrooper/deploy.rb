@@ -79,7 +79,7 @@ module Paratrooper
       unless tag_name.nil? || tag_name.empty?
         notify(:update_repo_tag)
         system_call "git tag #{tag_name} #{match_tag} -f"
-        system_call "git push -f #{git_remote} #{tag_name}"
+        system_call "git push -f #{repo_remote} #{tag_name}"
       end
     end
 
@@ -88,7 +88,7 @@ module Paratrooper
     def push_repo
       reference_point = tag_name || 'master'
       notify(:push_repo, reference_point: reference_point)
-      system_call "git push -f #{git_remote} #{reference_point}:master"
+      system_call "git push -f #{deployment_remote} #{reference_point}:master"
     end
 
     # Public: Runs rails database migrations on your application.
@@ -147,14 +147,23 @@ module Paratrooper
       {
         app_name: app_name,
         app_url: app_url,
-        git_remote: git_remote,
+        repo_remote: repo_remote,
+        deployment_remote: deployment_remote,
         tag_name: tag_name,
         match_tag: match_tag
       }
     end
 
-    def git_remote
-      "git@#{deployment_host}:#{app_name}.git"
+    def git_remote(host, name)
+      "git@#{host}:#{name}.git"
+    end
+
+    def deployment_remote
+      git_remote(deployment_host, app_name)
+    end
+
+    def repo_remote
+      git_remote(repo_host, repo_name)
     end
 
     # Internal: Calls commands meant to go to system

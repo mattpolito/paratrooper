@@ -55,8 +55,21 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "accepts :protocol" do
-      let(:options) { { protocol: 'https' } }
+    describe "protocol" do
+      context "accepts :protocol" do
+        let(:options) { { protocol: 'https' } }
+
+        it "and responds to #protocol" do
+          expect(deployer.protocol).to eq('https')
+        end
+      end
+
+      context "no value passed" do
+        it "and responds to #protocol with default value" do
+          expect(deployer.protocol).to eq('http')
+        end
+      end
+    end
 
       it "and responds to #protocol" do
         expect(deployer.protocol).to eq('https')

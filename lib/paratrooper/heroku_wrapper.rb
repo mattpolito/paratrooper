@@ -35,6 +35,12 @@ module Paratrooper
       rendezvous.start(:url => data['rendezvous_url'])
     end
 
+    def last_deploy_commit
+      data = heroku_api.get_releases(app_name).body
+      return nil if data.empty?
+      data.last['commit']
+    end
+
     private
     def app_domain_name
       if custom_domain_response

@@ -107,4 +107,29 @@ describe Paratrooper::HerokuWrapper do
       end
     end
   end
+
+  describe "#last_deploy_commit" do
+    context "when deploy data is returned" do
+      let(:response) do
+        double(:response, body: [{ 'commit' => 'SHA' }])
+      end
+      it "returns string of last deployed commit" do
+        heroku_api.should_receive(:get_releases).with(app_name)
+          .and_return(response)
+        expect(wrapper.last_deploy_commit).to eq('SHA')
+      end
+    end
+
+    context "when no deploys have happened yet" do
+      let(:response) do
+        double(:response, body: [])
+      end
+
+      it "returns nil" do
+        heroku_api.should_receive(:get_releases).with(app_name)
+          .and_return(response)
+        expect(wrapper.last_deploy_commit).to eq(nil)
+      end
+    end
+  end
 end

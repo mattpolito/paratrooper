@@ -8,7 +8,7 @@ module Paratrooper
 
     def execute(call)
       debug_message_for(call)
-      system(call)
+      `#{call}`
     end
 
     private

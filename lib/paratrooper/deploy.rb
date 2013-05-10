@@ -1,6 +1,7 @@
 require 'paratrooper/heroku_wrapper'
 require 'paratrooper/system_caller'
 require 'paratrooper/notifiers/screen_notifier'
+require 'paratrooper/pending_migration_check'
 
 module Paratrooper
 
@@ -28,6 +29,8 @@ module Paratrooper
     #                               application (optional, default: 'http').
     #            :deployment_host - String host name to be used in git URL
     #                               (optional, default: 'heroku.com').
+    #            :migration_check - Object responsible for checking pending
+    #                               migrations (optional).
     def initialize(app_name, options = {})
       @app_name        = app_name
       @notifiers       = options[:notifiers] || [Notifiers::ScreenNotifier.new]
@@ -90,6 +93,7 @@ module Paratrooper
     # Public: Runs rails database migrations on your application.
     #
     def run_migrations
+      return unless pending_migrations?
       notify(:run_migrations)
       heroku.run_migrations
     end
@@ -155,6 +159,14 @@ module Paratrooper
 
     def deployment_remote
       git_remote(deployment_host, app_name)
+    end
+
+    def pending_migrations?
+      migration_check.migrations_waiting?
+    end
+
+    def migration_check=(obj)
+      @migration_check = obj || PendingMigrationCheck.new(match_tag, heroku, system_caller)
     end
 
     # Internal: Calls commands meant to go to system

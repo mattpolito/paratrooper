@@ -10,7 +10,8 @@ describe Paratrooper::Deploy do
     {
       heroku: heroku,
       notifiers: [],
-      system_caller: system_caller
+      system_caller: system_caller,
+      migration_check: migration_check
     }
   end
   let(:options) { Hash.new }
@@ -24,6 +25,7 @@ describe Paratrooper::Deploy do
     )
   end
   let(:system_caller) { double(:system_caller) }
+  let(:migration_check) { double(:migration_check) }
   let(:domain_response) do
     double(:domain_response, body: [{'domain' => 'application_url'}])
   end
@@ -175,14 +177,31 @@ describe Paratrooper::Deploy do
       system_caller.stub(:execute)
     end
 
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:run_migrations).once
-      deployer.run_migrations
+    context "when new migrations are waiting to be run" do
+      before do
+        migration_check.stub(:migrations_waiting?).and_return(true)
+      end
+
+      it 'sends notification' do
+        deployer.should_receive(:notify).with(:run_migrations).once
+        deployer.run_migrations
+      end
+
+      it 'pushes repo to heroku' do
+        heroku.should_receive(:run_migrations)
+        deployer.run_migrations
+      end
     end
 
-    it 'pushes repo to heroku' do
-      heroku.should_receive(:run_migrations)
-      deployer.run_migrations
+    context "when no migrations are available to be run" do
+      before do
+        migration_check.stub(:migrations_waiting?).and_return(false)
+      end
+
+      specify "heroku is not notified to run migrations" do
+        heroku.should_not_receive(:run_migrations)
+        deployer.run_migrations
+      end
     end
   end
 

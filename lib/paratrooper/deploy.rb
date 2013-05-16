@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :deployment_host, :debug
+      :match_tag, :protocol, :deployment_host, :migration_check, :debug
 
     # Public: Initializes a Deploy
     #
@@ -38,6 +38,7 @@ module Paratrooper
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
       @debug           = options[:debug] || false
+      self.migration_check = options[:migration_check]
     end
 
     def setup

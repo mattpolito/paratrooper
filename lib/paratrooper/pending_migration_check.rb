@@ -8,6 +8,7 @@ module Paratrooper
       self.heroku         = heroku_wrapper
       self.match_tag_name = match_tag_name
       self.system_caller  = system_caller
+      last_deployed_commit
     end
 
     def migrations_waiting?
@@ -17,7 +18,7 @@ module Paratrooper
     end
 
     def last_deployed_commit
-      heroku.last_deploy_commit
+      @last_deploy_commit ||= heroku.last_deploy_commit
     end
   end
 end

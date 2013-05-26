@@ -25,7 +25,9 @@ describe Paratrooper::Deploy do
     )
   end
   let(:system_caller) { double(:system_caller) }
-  let(:migration_check) { double(:migration_check) }
+  let(:migration_check) do
+    double(:migration_check, last_deployed_commit: 'DEPLOYED_SHA')
+  end
   let(:domain_response) do
     double(:domain_response, body: [{'domain' => 'application_url'}])
   end

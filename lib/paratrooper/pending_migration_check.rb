@@ -8,7 +8,6 @@ module Paratrooper
       self.heroku         = heroku_wrapper
       self.match_tag_name = match_tag_name
       self.system_caller  = system_caller
-      last_deployed_commit
     end
 
     def migrations_waiting?

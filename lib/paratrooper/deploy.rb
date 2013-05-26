@@ -167,6 +167,8 @@ module Paratrooper
 
     def migration_check=(obj)
       @migration_check = obj || PendingMigrationCheck.new(match_tag, heroku, system_caller)
+      @migration_check.last_deployed_commit
+      @migration_check
     end
 
     # Internal: Calls commands meant to go to system

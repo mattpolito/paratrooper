@@ -111,7 +111,7 @@ This will perform the following tasks:
 * Activate maintenance mode
 * Create or update a git tag (if provided)
 * Push changes to Heroku
-* Run database migrations
+* Run database migrations if any have been added to db/migrate
 * Restart the application
 * Deactivate maintenance mode
 * Warm application instance

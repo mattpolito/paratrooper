@@ -87,7 +87,7 @@ module Paratrooper
     def push_repo
       reference_point = tag_name || 'master'
       notify(:push_repo, reference_point: reference_point)
-      system_call "git push -f #{deployment_remote} #{reference_point}:master"
+      system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
     end
 
     # Public: Runs rails database migrations on your application.

@@ -135,7 +135,8 @@ namespace :deploy do
   task :production do
     deployment = Paratrooper::Deploy.new("amazing-production-app",
       tag: 'production',
-      match_tag_to: 'staging'
+      match_tag_to: 'staging',
+      use_maintenance_mode: !ENV['NO_MAINTENANCE']
     )
 
     deployment.deploy

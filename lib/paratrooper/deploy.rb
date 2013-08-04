@@ -31,6 +31,9 @@ module Paratrooper
     #                               (optional, default: 'heroku.com').
     #            :migration_check - Object responsible for checking pending
     #                               migrations (optional).
+    #            :use_maintenance_mode - Boolean whether to trigger maintenance
+    #                               mode on and off during deployment (default:
+    #                               true)
     def initialize(app_name, options = {})
       @app_name        = app_name
       @notifiers       = options[:notifiers] || [Notifiers::ScreenNotifier.new]
@@ -41,6 +44,7 @@ module Paratrooper
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
       @debug           = options[:debug] || false
+      @use_maintenance_mode = options.fetch(:use_maintenance_mode, true)
       self.migration_check = options[:migration_check]
     end
 
@@ -61,6 +65,7 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
+      return unless use_maintenance_mode?
       notify(:activate_maintenance_mode)
       heroku.app_maintenance_on
     end
@@ -68,6 +73,7 @@ module Paratrooper
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
+      return unless use_maintenance_mode?
       notify(:deactivate_maintenance_mode)
       heroku.app_maintenance_off
     end
@@ -137,6 +143,10 @@ module Paratrooper
       teardown
     end
     alias_method :deploy, :default_deploy
+
+    def use_maintenance_mode?
+      !!@use_maintenance_mode
+    end
 
     private
     def app_url

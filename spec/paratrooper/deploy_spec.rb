@@ -11,7 +11,8 @@ describe Paratrooper::Deploy do
       heroku: heroku,
       notifiers: [],
       system_caller: system_caller,
-      migration_check: migration_check
+      migration_check: migration_check,
+      use_maintenance_mode: true
     }
   end
   let(:options) { Hash.new }
@@ -59,6 +60,15 @@ describe Paratrooper::Deploy do
       end
     end
 
+    context "accepts :use_maintenance_mode" do
+      let(:options) { { use_maintenance_mode: false } }
+      let(:notifiers) { double(:notifier) }
+
+      it "and responds to #notifiers" do
+        expect(deployer.use_maintenance_mode?).to eq(false)
+      end
+    end
+
     describe "protocol" do
       context "accepts :protocol" do
         let(:options) { { protocol: 'https' } }
@@ -85,26 +95,62 @@ describe Paratrooper::Deploy do
   end
 
   describe "#activate_maintenance_mode" do
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:activate_maintenance_mode).once
-      deployer.activate_maintenance_mode
+    context "when use_maintenance_mode option is 'true'" do
+      let(:options) { { use_maintenance_mode: true } }
+
+      it 'sends notification' do
+        deployer.should_receive(:notify).with(:activate_maintenance_mode).once
+        deployer.activate_maintenance_mode
+      end
+
+      it "makes call to heroku to turn on maintenance mode" do
+        heroku.should_receive(:app_maintenance_on)
+        deployer.activate_maintenance_mode
+      end
     end
 
-    it "makes call to heroku to turn on maintenance mode" do
-      heroku.should_receive(:app_maintenance_on)
-      deployer.activate_maintenance_mode
+    context "when use_maintenance_mode option is 'false'" do
+      let(:options) { { use_maintenance_mode: false } }
+
+      it 'does not send notification' do
+        deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
+        deployer.activate_maintenance_mode
+      end
+
+      it "does not make a call to heroku to turn on maintenance mode" do
+        heroku.should_not_receive(:app_maintenance_on)
+        deployer.activate_maintenance_mode
+      end
     end
   end
 
   describe "#deactivate_maintenance_mode" do
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
-      deployer.deactivate_maintenance_mode
+    context "when use_maintenance_mode option is 'true'" do
+      let(:options) { { use_maintenance_mode: true } }
+
+      it 'sends notification' do
+        deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
+        deployer.deactivate_maintenance_mode
+      end
+
+      it "makes call to heroku to turn on maintenance mode" do
+        heroku.should_receive(:app_maintenance_off)
+        deployer.deactivate_maintenance_mode
+      end
     end
 
-    it "makes call to heroku to turn on maintenance mode" do
-      heroku.should_receive(:app_maintenance_off)
-      deployer.deactivate_maintenance_mode
+    context "when use_maintenance_mode option is 'false'" do
+      let(:options) { { use_maintenance_mode: false } }
+
+      it 'does not send notification' do
+        deployer.should_not_receive(:notify).with(:deactivate_maintenance_mode)
+        deployer.deactivate_maintenance_mode
+      end
+
+      it "does not make a call to heroku to turn on maintenance mode" do
+        heroku.should_not_receive(:app_maintenance_off)
+        deployer.deactivate_maintenance_mode
+      end
     end
   end
 

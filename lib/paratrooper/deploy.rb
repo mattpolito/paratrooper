@@ -2,89 +2,107 @@ require 'paratrooper/heroku_wrapper'
 require 'paratrooper/system_caller'
 require 'paratrooper/notifiers/screen_notifier'
 require 'paratrooper/pending_migration_check'
+require 'paratrooper/callbacks'
 
 module Paratrooper
 
   # Public: Entry point into the library.
   #
   class Deploy
-    attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :deployment_host, :migration_check, :debug
+    include Callbacks
+
+    attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
+      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
+      :maintenance_mode
+
+    alias_method :tag=, :tag_name=
+    alias_method :match_tag=, :match_tag_name=
 
     # Public: Initializes a Deploy
     #
     # app_name - A String naming the Heroku application to be interacted with.
     # options  - The Hash options is used to provide additional functionality.
-    #            :notifiers       - Array of objects interested in being
-    #                               notified of steps in deployment process
-    #                               (optional).
-    #            :heroku          - Object wrapper around heroku-api (optional).
-    #            :tag             - String name to be used as a git reference
-    #                               point (optional).
-    #            :match_tag_to    - String name of git reference point to match
-    #                               :tag to (optional).
-    #            :system_caller   - Object responsible for calling system
-    #                               commands (optional).
-    #            :protocol        - String web protocol to be used when pinging
-    #                               application (optional, default: 'http').
-    #            :deployment_host - String host name to be used in git URL
-    #                               (optional, default: 'heroku.com').
-    #            :migration_check - Object responsible for checking pending
-    #                               migrations (optional).
-    #            :use_maintenance_mode - Boolean whether to trigger maintenance
-    #                               mode on and off during deployment (default:
-    #                               true)
-    def initialize(app_name, options = {})
-      @app_name        = app_name
-      @notifiers       = options[:notifiers] || [Notifiers::ScreenNotifier.new]
-      @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
-      @tag_name        = options[:tag]
-      @match_tag       = options[:match_tag_to] || 'master'
-      @system_caller   = options[:system_caller] || SystemCaller.new(debug)
-      @protocol        = options[:protocol] || 'http'
-      @deployment_host = options[:deployment_host] || 'heroku.com'
-      @debug           = options[:debug] || false
-      @use_maintenance_mode = options.fetch(:use_maintenance_mode, true)
+    #            :notifiers        - Array of objects interested in being
+    #                                notified of steps in deployment process
+    #                                (optional).
+    #            :heroku           - Object wrapper around heroku-api (optional).
+    #            :tag              - String name to be used as a git reference
+    #                                point (optional).
+    #            :match_tag_to     - String name of git reference point to match
+    #                                :tag to (optional).
+    #            :system_caller    - Object responsible for calling system
+    #                                commands (optional).
+    #            :protocol         - String web protocol to be used when pinging
+    #                                application (optional, default: 'http').
+    #            :deployment_host  - String host name to be used in git URL
+    #                                (optional, default: 'heroku.com').
+    #            :migration_check  - Object responsible for checking pending
+    #                                migrations (optional).
+    #            :maintenance_mode - Boolean whether to trigger maintenance
+    #                                mode on and off during deployment
+    #                                (default: true)
+    def initialize(app_name, options = {}, &block)
+      @app_name         = app_name
+      @notifiers        = options[:notifiers] || [Notifiers::ScreenNotifier.new]
+      @heroku           = options[:heroku] || HerokuWrapper.new(app_name, options)
+      @tag_name         = options[:tag]
+      @match_tag_name   = options[:match_tag] || 'master'
+      @system_caller    = options[:system_caller] || SystemCaller.new(debug)
+      @protocol         = options[:protocol] || 'http'
+      @deployment_host  = options[:deployment_host] || 'heroku.com'
+      @debug            = options[:debug] || false
+      @maintenance_mode = options.fetch(:maintenance_mode, true)
       self.migration_check = options[:migration_check]
+      block.call(self) if block_given?
+    end
+
+    def notify(step, options = {})
+      notifiers.each do |notifier|
+        notifier.notify(step, default_payload.merge(options))
+      end
     end
 
     def setup
-      notify(:setup)
+      callback(:setup) do
+        notify(:setup)
+      end
     end
 
     def teardown
-      notify(:teardown)
-    end
-
-    def notify(step, options={})
-      notifiers.each do |notifier|
-        notifier.notify(step, default_payload.merge(options))
+      callback(:teardown) do
+        notify(:teardown)
       end
     end
 
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      return unless use_maintenance_mode?
-      notify(:activate_maintenance_mode)
-      heroku.app_maintenance_on
+      return unless maintenance_mode?
+      callback(:activate_maintenance_mode) do
+        notify(:activate_maintenance_mode)
+        heroku.app_maintenance_on
+      end
     end
 
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
-      return unless use_maintenance_mode?
-      notify(:deactivate_maintenance_mode)
-      heroku.app_maintenance_off
+      return unless maintenance_mode?
+      callback(:deactivate_maintenance_mode) do
+        notify(:deactivate_maintenance_mode)
+        heroku.app_maintenance_off
+      end
     end
 
     # Public: Creates a git tag and pushes it to repository.
     #
     def update_repo_tag
       unless tag_name.nil? || tag_name.empty?
-        notify(:update_repo_tag)
-        system_call "git tag #{tag_name} #{match_tag} -f"
-        system_call "git push -f origin #{tag_name}"
+        callback(:update_repo_tag) do
+          notify(:update_repo_tag)
+          system_call "git tag #{tag_name} #{match_tag_name} -f"
+          system_call "git push -f origin #{tag_name}"
+        end
       end
     end
 
@@ -92,31 +110,39 @@ module Paratrooper
     #
     def push_repo
       reference_point = tag_name || 'master'
-      notify(:push_repo, reference_point: reference_point)
-      system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
+      callback(:push_repo) do
+        notify(:push_repo, reference_point: reference_point)
+        system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
+      end
     end
 
     # Public: Runs rails database migrations on your application.
     #
     def run_migrations
       return unless pending_migrations?
-      notify(:run_migrations)
-      heroku.run_migrations
+      callback(:run_migrations) do
+        notify(:run_migrations)
+        heroku.run_migrations
+      end
     end
 
     # Public: Restarts application on Heroku.
     #
     def app_restart
-      notify(:app_restart)
-      heroku.app_restart
+      callback(:app_restart) do
+        notify(:app_restart)
+        heroku.app_restart
+      end
     end
 
     # Public: cURL for application URL to start your Heroku dyno.
     #
     def warm_instance(wait_time = 3)
-      sleep wait_time
-      notify(:warm_instance)
-      system_call "curl -Il #{protocol}://#{app_url}"
+      callback(:warm_instance) do
+        notify(:warm_instance)
+        sleep wait_time
+        system_call "curl -Il #{protocol}://#{app_url}"
+      end
     end
 
     # Public: Execute common deploy steps.
@@ -144,8 +170,8 @@ module Paratrooper
     end
     alias_method :deploy, :default_deploy
 
-    def use_maintenance_mode?
-      !!@use_maintenance_mode
+    def maintenance_mode?
+      !!@maintenance_mode
     end
 
     private
@@ -176,7 +202,7 @@ module Paratrooper
     end
 
     def migration_check=(obj)
-      @migration_check = obj || PendingMigrationCheck.new(match_tag, heroku, system_caller)
+      @migration_check = obj || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
       @migration_check.last_deployed_commit
       @migration_check
     end

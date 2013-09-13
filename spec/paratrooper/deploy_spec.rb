@@ -12,7 +12,7 @@ describe Paratrooper::Deploy do
       notifiers: [],
       system_caller: system_caller,
       migration_check: migration_check,
-      use_maintenance_mode: true
+      maintenance_mode: true
     }
   end
   let(:options) { Hash.new }
@@ -31,6 +31,39 @@ describe Paratrooper::Deploy do
   end
   let(:domain_response) do
     double(:domain_response, body: [{'domain' => 'application_url'}])
+  end
+
+  describe "tag=" do
+    specify "tag is set and @tag_name holds value" do
+      deployer.tag = "tag_name"
+      expect(deployer.tag_name).to eq("tag_name")
+    end
+  end
+
+  describe "match_tag_to=" do
+    specify "match_tag is set and @match_tag_name holds value" do
+      deployer.match_tag = "staging"
+      expect(deployer.match_tag_name).to eq("staging")
+    end
+  end
+
+  describe "passing a block to initialize" do
+    it "sets attributes on self" do
+      deployer = described_class.new(app_name, default_options) do |p|
+        p.match_tag = "staging"
+        p.tag = "production"
+        p.debug = true
+        p.maintenance_mode = true
+        p.deployment_host = "HOST"
+        p.protocol = "MOM"
+      end
+      expect(deployer.match_tag_name).to eq("staging")
+      expect(deployer.tag_name).to eq("production")
+      expect(deployer.debug).to be_true
+      expect(deployer.maintenance_mode).to be_true
+      expect(deployer.deployment_host).to eq("HOST")
+      expect(deployer.protocol).to eq("MOM")
+    end
   end
 
   describe "options" do
@@ -60,12 +93,12 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "accepts :use_maintenance_mode" do
-      let(:options) { { use_maintenance_mode: false } }
+    context "accepts :maintenance_mode" do
+      let(:options) { { maintenance_mode: false } }
       let(:notifiers) { double(:notifier) }
 
       it "and responds to #notifiers" do
-        expect(deployer.use_maintenance_mode?).to eq(false)
+        expect(deployer.maintenance_mode?).to eq(false)
       end
     end
 
@@ -95,8 +128,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#activate_maintenance_mode" do
-    context "when use_maintenance_mode option is 'true'" do
-      let(:options) { { use_maintenance_mode: true } }
+    context "when maintenance_mode option is 'true'" do
+      let(:options) { { maintenance_mode: true } }
 
       it 'sends notification' do
         deployer.should_receive(:notify).with(:activate_maintenance_mode).once
@@ -109,8 +142,8 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "when use_maintenance_mode option is 'false'" do
-      let(:options) { { use_maintenance_mode: false } }
+    context "when maintenance_mode option is 'false'" do
+      let(:options) { { maintenance_mode: false } }
 
       it 'does not send notification' do
         deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
@@ -125,8 +158,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#deactivate_maintenance_mode" do
-    context "when use_maintenance_mode option is 'true'" do
-      let(:options) { { use_maintenance_mode: true } }
+    context "when maintenance_mode option is 'true'" do
+      let(:options) { { maintenance_mode: true } }
 
       it 'sends notification' do
         deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
@@ -139,8 +172,8 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "when use_maintenance_mode option is 'false'" do
-      let(:options) { { use_maintenance_mode: false } }
+    context "when maintenance_mode option is 'false'" do
+      let(:options) { { maintenance_mode: false } }
 
       it 'does not send notification' do
         deployer.should_not_receive(:notify).with(:deactivate_maintenance_mode)
@@ -169,7 +202,7 @@ describe Paratrooper::Deploy do
 
       context "when deploy_tag is available" do
         before do
-          options.merge!(match_tag_to: 'deploy_this')
+          options.merge!(match_tag: 'deploy_this')
         end
 
         it 'creates a git tag at deploy_tag reference point' do
@@ -288,6 +321,25 @@ describe Paratrooper::Deploy do
         expected_call = 'curl -Il https://application_url'
         system_caller.should_receive(:execute).with(expected_call)
         deployer.warm_instance(0)
+      end
+    end
+
+    describe "adding notification" do
+      after do
+        FileUtils.rm("spec/fixtures/test.txt")
+      end
+
+      it "adds notifier to #notifiers collection" do
+        callback = proc do
+          system("touch spec/fixtures/test.txt")
+        end
+
+        deployer = described_class.new(app_name, default_options) do |p|
+          p.add_callback(:before_setup, &callback)
+        end
+        deployer.setup
+
+        expect(deployer.callbacks[:before_setup]).to eq([callback])
       end
     end
   end

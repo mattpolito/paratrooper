@@ -42,6 +42,14 @@ You can also provide a tag:
 Paratrooper::Deploy.new('amazing-app', tag: 'staging')
 ```
 
+or alternatively:
+
+```ruby
+Paratrooper::Deploy.new('amazing-app') do |deploy|
+  deploy.tag = 'staging'
+end
+```
+
 ## Authentication
 
 You can authenticate your Heroku account in a few ways:
@@ -75,6 +83,14 @@ If you use multiple SSH keys for managing multiple accounts, for example in your
 Paratrooper::Deploy.new('app', deployment_host: 'HOST')
 ```
 
+or alternatively:
+
+```ruby
+Paratrooper::Deploy.new('amazing-app') do |deploy|
+  deploy.deployment_host = 'HOST'
+end
+```
+
 This also works if you're using the [heroku-accounts](https://github.com/ddollar/heroku-accounts) plugin:
 
 ```ruby
@@ -97,8 +113,17 @@ This will create/update a `staging` git tag at `HEAD`.
 ```ruby
   Paratrooper::Deploy.new("amazing-production-app",
     tag: 'production',
-    match_tag_to: 'staging'
+    match_tag: 'staging'
   )
+```
+
+or alternatively:
+
+```ruby
+Paratrooper::Deploy.new('amazing-production-app') do |deploy|
+  deploy.tag       = 'production'
+  deploy.match_tag = 'staging'
+end
 ```
 This will create/update a `production` git tag at `staging` and deploy the `production` tag.
 
@@ -133,10 +158,10 @@ namespace :deploy do
 
   desc 'Deploy app in production environment'
   task :production do
-    deployment = Paratrooper::Deploy.new("amazing-production-app",
-      tag: 'production',
-      match_tag_to: 'staging',
-      use_maintenance_mode: !ENV['NO_MAINTENANCE']
+    deployment = Paratrooper::Deploy.new("amazing-production-app") do |deploy|
+      deploy.tag              = 'production',
+      deploy.match_tag        = 'staging',
+      deploy.maintenance_mode = !ENV['NO_MAINTENANCE']
     )
 
     deployment.deploy
@@ -147,42 +172,50 @@ end
 ## Bucking the Norm
 
 Our default deploy gets us most of the way, but maybe it's not for you--we've
-got you covered. Every deployment method sends a notification that can be
-captured and used in almost any way you can imagine.
+got you covered. Every deployment method has a set of callback instructions that can be
+utilized in almost any way you can imagine.
+
+The `add_callback` method allows for the execution of arbitrary code within different steps of the deploy process.
+
+There are 'before' and 'after' hooks for each of the following:
+
+* setup
+* activate_maintenance_mode
+* update_repo_tag
+* push_repo
+* run_migrations
+* app_restart
+* deactivate_maintenance_mode
+* warm_instance
+* teardown
+
+### Example Usage
 
 For example, say you want to let [New Relic][] know that you are deploying and
 to disable your application monitoring.
 
-### Example Usage
-
 ```ruby
-# Gemfile
-gem 'paratrooper-newrelic'
-
 # lib/tasks/deploy.rake
 require 'paratrooper'
 
 namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
-    deployment = Paratrooper::Deploy.new("amazing-production-app",
-      tag: 'production',
-      match_tag_to: 'staging',
-      notifiers: [
-        Paratrooper::Notifiers::ScreenNotifier.new,
-        Paratrooper::Newrelic::Notifier.new('api_key', 'account_id', 'application_id')
-      ]
-    )
+    deployment = Paratrooper::Deploy.new("amazing-production-app") do |deploy|
+      deploy.tag = 'production'
+      deploy.match_tag = 'staging'
+      deploy.add_callback(:before_setup) do
+        system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/disable -X POST -H "X-Api-Key: API_KEY"]
+      end
+      deploy.add_callback(:after_teardown) do
+        system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/enable -X POST -H "X-Api-Key: API_KEY"]
+      end
+    end
+
+    deployment.deploy
   end
 end
 ```
-
-* The `ScreenNotifier` is added by default so when you override the `notifiers`
-  option you need to manually add it to continue receiving screen output.
-
-To make your own notifier, take a look at [`Paratrooper::Notifier`][] to see
-what methods are available for override.
-
 
 ## Contributing
 

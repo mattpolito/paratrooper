@@ -41,6 +41,8 @@ module Paratrooper
     #            :maintenance_mode - Boolean whether to trigger maintenance
     #                                mode on and off during deployment
     #                                (default: true)
+    #            :api_key          - String version of heroku api key.
+    #                                (default: looks in local Netrc file)
     def initialize(app_name, options = {}, &block)
       @app_name         = app_name
       @notifiers        = options[:notifiers] || [Notifiers::ScreenNotifier.new]

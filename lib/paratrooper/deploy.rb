@@ -187,7 +187,7 @@ module Paratrooper
         app_url: app_url,
         deployment_remote: deployment_remote,
         tag_name: tag_name,
-        match_tag: match_tag
+        match_tag: match_tag_name
       }
     end
 

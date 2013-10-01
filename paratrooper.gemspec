@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Library to create task for deployment to Heroku}
   gem.summary       = %q{Library to create task for deployment to Heroku}
   gem.homepage      = "http://github.com/mattpolito/paratrooper"
+  gem.license       = "MIT"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

@@ -28,7 +28,7 @@ module Paratrooper
     #            :heroku           - Object wrapper around heroku-api (optional).
     #            :tag              - String name to be used as a git reference
     #                                point (optional).
-    #            :match_tag_to     - String name of git reference point to match
+    #            :match_tag        - String name of git reference point to match
     #                                :tag to (optional).
     #            :system_caller    - Object responsible for calling system
     #                                commands (optional).
@@ -38,11 +38,10 @@ module Paratrooper
     #                                (optional, default: 'heroku.com').
     #            :migration_check  - Object responsible for checking pending
     #                                migrations (optional).
-    #            :maintenance_mode - Boolean whether to trigger maintenance
-    #                                mode on and off during deployment
-    #                                (default: true)
+    #            :maintenance_mode - Boolean o toggle maintenance mode during
+    #                                deployment (default: true).
     #            :api_key          - String version of heroku api key.
-    #                                (default: looks in local Netrc file)
+    #                                (default: looks in local Netrc file).
     def initialize(app_name, options = {}, &block)
       @app_name         = app_name
       @notifiers        = options[:notifiers] || [Notifiers::ScreenNotifier.new]

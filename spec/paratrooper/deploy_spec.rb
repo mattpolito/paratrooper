@@ -210,7 +210,7 @@ describe Paratrooper::Deploy do
     end
 
     it 'pushes repo to heroku' do
-      expected_call = 'git push -f git@heroku.com:app.git master:refs/heads/master'
+      expected_call = 'git push -f git@heroku.com:app.git master:master'
       system_caller.should_receive(:execute).with(expected_call)
       deployer.push_repo
     end

@@ -8,7 +8,7 @@ module Paratrooper
   #
   class Deploy
     attr_reader :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag, :protocol, :deployment_host, :debug
+      :match_tag, :protocol, :deployment_host, :debug, :branch
 
     # Public: Initializes a Deploy
     #
@@ -37,6 +37,7 @@ module Paratrooper
       @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name        = options[:tag]
       @match_tag       = options[:match_tag_to] || 'master'
+      @branch          = options[:branch] || 'master'
       @system_caller   = options[:system_caller] || SystemCaller.new(debug)
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
@@ -87,9 +88,9 @@ module Paratrooper
     # Public: Pushes repository to Heroku.
     #
     def push_repo
-      reference_point = tag_name || 'master'
+      reference_point = tag_name || branch
       notify(:push_repo, reference_point: reference_point)
-      system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
+      system_call "git push -f #{deployment_remote} #{reference_point}:master"
     end
 
     # Public: Runs rails database migrations on your application.

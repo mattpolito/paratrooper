@@ -88,7 +88,7 @@ module Paratrooper
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
-      return unless maintenance_mode?
+      return unless maintenance_mode? && pending_migrations?
       callback(:deactivate_maintenance_mode) do
         notify(:deactivate_maintenance_mode)
         heroku.app_maintenance_off

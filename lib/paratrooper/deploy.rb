@@ -78,7 +78,7 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      return unless maintenance_mode? && pending_migrations?
+      return unless restart_required?
       callback(:activate_maintenance_mode) do
         notify(:activate_maintenance_mode)
         heroku.app_maintenance_on
@@ -88,7 +88,7 @@ module Paratrooper
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
-      return unless maintenance_mode? && pending_migrations?
+      return unless restart_required?
       callback(:deactivate_maintenance_mode) do
         notify(:deactivate_maintenance_mode)
         heroku.app_maintenance_off
@@ -206,6 +206,10 @@ module Paratrooper
       @migration_check = obj || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
       @migration_check.last_deployed_commit
       @migration_check
+    end
+
+    def restart_required?
+      maintenance_mode? && pending_migrations?
     end
 
     # Internal: Calls commands meant to go to system

@@ -36,7 +36,7 @@ module Paratrooper
       end
 
       def activate_maintenance_mode(options = {})
-        display("Activating Maintenance Mode")
+        display("Activating Maintenance Mode - Enabled due to pending migrations")
       end
 
       def deactivate_maintenance_mode(options = {})

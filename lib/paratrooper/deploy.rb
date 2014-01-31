@@ -12,8 +12,7 @@ module Paratrooper
     include Callbacks
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :maintenance_mode
+      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -38,8 +37,6 @@ module Paratrooper
     #                                (optional, default: 'heroku.com').
     #            :migration_check  - Object responsible for checking pending
     #                                migrations (optional).
-    #            :maintenance_mode - Boolean o toggle maintenance mode during
-    #                                deployment (default: true).
     #            :api_key          - String version of heroku api key.
     #                                (default: looks in local Netrc file).
     def initialize(app_name, options = {}, &block)
@@ -52,7 +49,6 @@ module Paratrooper
       @protocol         = options[:protocol] || 'http'
       @deployment_host  = options[:deployment_host] || 'heroku.com'
       @debug            = options[:debug] || false
-      @maintenance_mode = options.fetch(:maintenance_mode, true)
       self.migration_check = options[:migration_check]
       block.call(self) if block_given?
     end
@@ -78,7 +74,7 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      return unless restart_required?
+      return unless pending_migrations?
       callback(:activate_maintenance_mode) do
         notify(:activate_maintenance_mode)
         heroku.app_maintenance_on
@@ -88,7 +84,7 @@ module Paratrooper
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
-      return unless restart_required?
+      return unless pending_migrations?
       callback(:deactivate_maintenance_mode) do
         notify(:deactivate_maintenance_mode)
         heroku.app_maintenance_off
@@ -130,6 +126,7 @@ module Paratrooper
     # Public: Restarts application on Heroku.
     #
     def app_restart
+      return unless restart_required?
       callback(:app_restart) do
         notify(:app_restart)
         heroku.app_restart
@@ -171,10 +168,6 @@ module Paratrooper
     end
     alias_method :deploy, :default_deploy
 
-    def maintenance_mode?
-      !!@maintenance_mode
-    end
-
     private
     def app_url
       heroku.app_url
@@ -209,7 +202,7 @@ module Paratrooper
     end
 
     def restart_required?
-      maintenance_mode? && pending_migrations?
+      pending_migrations?
     end
 
     # Internal: Calls commands meant to go to system

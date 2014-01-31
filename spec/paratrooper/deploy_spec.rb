@@ -53,14 +53,12 @@ describe Paratrooper::Deploy do
         p.match_tag = "staging"
         p.tag = "production"
         p.debug = true
-        p.maintenance_mode = true
         p.deployment_host = "HOST"
         p.protocol = "MOM"
       end
       expect(deployer.match_tag_name).to eq("staging")
       expect(deployer.tag_name).to eq("production")
       expect(deployer.debug).to be_true
-      expect(deployer.maintenance_mode).to be_true
       expect(deployer.deployment_host).to eq("HOST")
       expect(deployer.protocol).to eq("MOM")
     end
@@ -90,15 +88,6 @@ describe Paratrooper::Deploy do
 
       it "and responds to #notifiers" do
         expect(deployer.notifiers).to eq([notifiers])
-      end
-    end
-
-    context "accepts :maintenance_mode" do
-      let(:options) { { maintenance_mode: false } }
-      let(:notifiers) { double(:notifier) }
-
-      it "and responds to #notifiers" do
-        expect(deployer.maintenance_mode?).to eq(false)
       end
     end
 
@@ -163,20 +152,6 @@ describe Paratrooper::Deploy do
         end
       end
     end
-
-    context "when maintenance_mode option is 'false'" do
-      let(:options) { { maintenance_mode: false } }
-
-      it 'does not send notification' do
-        deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
-        deployer.activate_maintenance_mode
-      end
-
-      it "does not make a call to heroku to turn on maintenance mode" do
-        heroku.should_not_receive(:app_maintenance_on)
-        deployer.activate_maintenance_mode
-      end
-    end
   end
 
   describe "#deactivate_maintenance_mode" do
@@ -213,20 +188,6 @@ describe Paratrooper::Deploy do
           heroku.should_not_receive(:app_maintenance_off)
           deployer.deactivate_maintenance_mode
         end
-      end
-    end
-
-    context "when maintenance_mode option is 'false'" do
-      let(:options) { { maintenance_mode: false } }
-
-      it 'does not send notification' do
-        deployer.should_not_receive(:notify).with(:deactivate_maintenance_mode)
-        deployer.deactivate_maintenance_mode
-      end
-
-      it "does not make a call to heroku to turn on maintenance mode" do
-        heroku.should_not_receive(:app_maintenance_off)
-        deployer.deactivate_maintenance_mode
       end
     end
   end
@@ -331,14 +292,36 @@ describe Paratrooper::Deploy do
   end
 
   describe "#app_restart" do
-    it 'sends notification' do
-      deployer.should_receive(:notify).with(:app_restart).once
-      deployer.app_restart
+    context 'when a restart is required due to pending migrations' do
+      before do
+        migration_check.stub(:migrations_waiting?).and_return(true)
+      end
+
+      it 'sends notification' do
+        expect(deployer).to receive(:notify).with(:app_restart).once
+        deployer.app_restart
+      end
+
+      it 'restarts your heroku instance' do
+        expect(heroku).to receive(:app_restart)
+        deployer.app_restart
+      end
     end
 
-    it 'restarts your heroku instance' do
-      heroku.should_receive(:app_restart)
-      deployer.app_restart
+    context 'when a restart is not required' do
+      before do
+        migration_check.stub(:migrations_waiting?).and_return(false)
+      end
+
+      it 'does not send notification' do
+        expect(deployer).to_not receive(:notify).with(:app_restart)
+        deployer.app_restart
+      end
+
+      it 'does not restart your heroku instance' do
+        expect(heroku).to_not receive(:app_restart)
+        deployer.app_restart
+      end
     end
   end
 

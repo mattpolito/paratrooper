@@ -2,6 +2,8 @@ require 'netrc'
 
 module Paratrooper
   class LocalApiKeyExtractor
+    class NetrcFileDoesNotExist < StandardError; end
+
     attr_reader :file_path, :netrc_klass
 
     def self.get_credentials
@@ -19,15 +21,22 @@ module Paratrooper
 
     private
     def netrc
-      @netrc ||= begin
-        File.exists?(file_path) && Netrc.read(file_path)
-      rescue => error
-        raise error
+      unless netrc_present?
+        raise NetrcFileDoesNotExist, netrc_file_missing_message
       end
+      @netrc ||= Netrc.read(file_path)
     end
 
     def read_credentials_for(domain)
       netrc[domain][1]
+    end
+
+    def netrc_file_missing_message
+      "Unable to find netrc file. Expected location: #{netrc_klass.default_path}."
+    end
+
+    def netrc_present?
+      File.exists?(file_path)
     end
   end
 end

@@ -12,7 +12,8 @@ module Paratrooper
     include Callbacks
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug
+      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
+      :screen_notifier
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -21,6 +22,8 @@ module Paratrooper
     #
     # app_name - A String naming the Heroku application to be interacted with.
     # options  - The Hash options is used to provide additional functionality.
+    #            :screen_notifier  - Object used for outputting to screen
+    #                                (optional).
     #            :notifiers        - Array of objects interested in being
     #                                notified of steps in deployment process
     #                                (optional).
@@ -40,15 +43,16 @@ module Paratrooper
     #            :api_key          - String version of heroku api key.
     #                                (default: looks in local Netrc file).
     def initialize(app_name, options = {}, &block)
-      @app_name         = app_name
-      @notifiers        = options[:notifiers] || [Notifiers::ScreenNotifier.new]
-      @heroku           = options[:heroku] || HerokuWrapper.new(app_name, options)
-      @tag_name         = options[:tag]
-      @match_tag_name   = options[:match_tag] || 'master'
-      @system_caller    = options[:system_caller] || SystemCaller.new(debug)
-      @protocol         = options[:protocol] || 'http'
-      @deployment_host  = options[:deployment_host] || 'heroku.com'
-      @debug            = options[:debug] || false
+      @app_name        = app_name
+      @screen_notifier = options[:screen_notifier] || Notifiers::ScreenNotifier.new
+      @notifiers       = options[:notifiers] || [@screen_notifier]
+      @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
+      @tag_name        = options[:tag]
+      @match_tag_name  = options[:match_tag] || 'master'
+      @system_caller   = options[:system_caller] || SystemCaller.new(debug)
+      @protocol        = options[:protocol] || 'http'
+      @deployment_host = options[:deployment_host] || 'heroku.com'
+      @debug           = options[:debug] || false
       self.migration_check = options[:migration_check]
       block.call(self) if block_given?
     end
@@ -210,6 +214,10 @@ module Paratrooper
     # call - String version of system command
     def system_call(call)
       system_caller.execute(call)
+    end
+
+    def callback(name, &block)
+      build_callback(name, screen_notifier, &block)
     end
   end
 end

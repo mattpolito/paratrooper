@@ -12,7 +12,7 @@ describe Paratrooper::Deploy do
       notifiers: [],
       system_caller: system_caller,
       migration_check: migration_check,
-      maintenance_mode: true
+      screen_notifier: screen_notifier
     }
   end
   let(:options) { Hash.new }
@@ -26,6 +26,7 @@ describe Paratrooper::Deploy do
     )
   end
   let(:system_caller) { double(:system_caller) }
+  let(:screen_notifier) { double(:screen_notifier) }
   let(:migration_check) do
     double(:migration_check, last_deployed_commit: 'DEPLOYED_SHA')
   end
@@ -351,22 +352,34 @@ describe Paratrooper::Deploy do
       end
     end
 
-    describe "adding notification" do
-      after do
-        FileUtils.rm("spec/fixtures/test.txt")
-      end
-
-      it "adds notifier to #notifiers collection" do
-        callback = proc do
+    describe "#add_callback" do
+      it "adds callback" do
+        callback = proc do |output|
           system("touch spec/fixtures/test.txt")
         end
 
         deployer = described_class.new(app_name, default_options) do |p|
           p.add_callback(:before_setup, &callback)
         end
-        deployer.setup
 
         expect(deployer.callbacks[:before_setup]).to eq([callback])
+      end
+
+      context "when messaging is added to callback" do
+        it "is called" do
+          callback = proc do |output|
+            output.display("Whoo Hoo!")
+          end
+
+          screen_notifier.stub(:display).with("Whoo Hoo!")
+
+          deployer = described_class.new(app_name, default_options) do |p|
+            p.add_callback(:before_setup, &callback)
+          end
+          deployer.setup
+
+          expect(screen_notifier).to have_received(:display).with("Whoo Hoo!")
+        end
       end
     end
   end

@@ -53,7 +53,7 @@ module Paratrooper
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
       @debug           = options[:debug] || false
-      self.migration_check = options[:migration_check]
+      @migration_check = options[:migration_check]
       block.call(self) if block_given?
     end
 

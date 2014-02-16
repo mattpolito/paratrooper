@@ -58,12 +58,6 @@ module Paratrooper
       block.call(self) if block_given?
     end
 
-    def notify(step, options = {})
-      notifiers.each do |notifier|
-        notifier.notify(step, default_payload.merge(options))
-      end
-    end
-
     def setup
       callback(:setup) do
         notify(:setup)
@@ -179,6 +173,10 @@ module Paratrooper
       heroku.app_url
     end
 
+    def callback(name, &block)
+      build_callback(name, screen_notifier, &block)
+    end
+
     def default_payload
       {
         app_name: app_name,
@@ -197,6 +195,12 @@ module Paratrooper
       git_remote(deployment_host, app_name)
     end
 
+    def notify(step, options = {})
+      notifiers.each do |notifier|
+        notifier.notify(step, default_payload.merge(options))
+      end
+    end
+
     def pending_migrations?
       migration_check.migrations_waiting?
     end
@@ -210,10 +214,6 @@ module Paratrooper
     # call - String version of system command
     def system_call(call)
       system_caller.execute(call)
-    end
-
-    def callback(name, &block)
-      build_callback(name, screen_notifier, &block)
     end
   end
 end

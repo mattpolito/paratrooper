@@ -53,7 +53,8 @@ module Paratrooper
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
       @debug           = options[:debug] || false
-      @migration_check = options[:migration_check]
+      @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
+
       block.call(self) if block_given?
     end
 
@@ -66,6 +67,7 @@ module Paratrooper
     def setup
       callback(:setup) do
         notify(:setup)
+        migration_check.last_deployed_commit
       end
     end
 
@@ -197,12 +199,6 @@ module Paratrooper
 
     def pending_migrations?
       migration_check.migrations_waiting?
-    end
-
-    def migration_check=(obj)
-      @migration_check = obj || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
-      @migration_check.last_deployed_commit
-      @migration_check
     end
 
     def restart_required?

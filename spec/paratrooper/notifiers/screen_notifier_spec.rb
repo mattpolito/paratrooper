@@ -10,9 +10,9 @@ describe Paratrooper::Notifiers::ScreenNotifier do
     it "outputs _message_ to screen" do
       expected_output = <<-EXPECTED_OUTPUT.gsub(/^ {8}/, '')
 
-        #{'=' * 80}
+        #{'=' * 60}
         >> MESSAGE
-        #{'=' * 80}
+        #{'=' * 60}
 
       EXPECTED_OUTPUT
 

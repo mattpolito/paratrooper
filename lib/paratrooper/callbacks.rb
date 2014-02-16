@@ -1,5 +1,11 @@
 module Paratrooper
   module Callbacks
+
+    # Public: Add misc. function to be called at a later time
+    #
+    # name  - String name of callback
+    #         Example: before_[method_name], after_[method_name]
+    # block - Code to be executed during callback
     def add_callback(name, &block)
       callbacks[name] << block
     end

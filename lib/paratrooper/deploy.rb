@@ -58,6 +58,8 @@ module Paratrooper
       block.call(self) if block_given?
     end
 
+    # Public: Hook method called first in the deploy process.
+    #
     def setup
       callback(:setup) do
         notify(:setup)
@@ -65,6 +67,8 @@ module Paratrooper
       end
     end
 
+    # Public: Hook method called last in the deploy process.
+    #
     def teardown
       callback(:teardown) do
         notify(:teardown)
@@ -135,6 +139,9 @@ module Paratrooper
 
     # Public: cURL for application URL to start your Heroku dyno.
     #
+    # wait_time - Integer length of time (seconds) to wait before making call
+    #             to app
+    #
     def warm_instance(wait_time = 3)
       callback(:warm_instance) do
         notify(:warm_instance)
@@ -177,6 +184,8 @@ module Paratrooper
       build_callback(name, screen_notifier, &block)
     end
 
+    # Internal: Payload data to be sent with notifications
+    #
     def default_payload
       {
         app_name: app_name,
@@ -195,6 +204,11 @@ module Paratrooper
       git_remote(deployment_host, app_name)
     end
 
+    # Internal: Notifies other objects that an event has occurred
+    #
+    # step    - String event name
+    # options - Hash of options to be sent as data payload
+    #
     def notify(step, options = {})
       notifiers.each do |notifier|
         notifier.notify(step, default_payload.merge(options))
@@ -212,6 +226,7 @@ module Paratrooper
     # Internal: Calls commands meant to go to system
     #
     # call - String version of system command
+    #
     def system_call(call)
       system_caller.execute(call)
     end

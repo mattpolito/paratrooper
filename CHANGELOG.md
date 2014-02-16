@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0.beta2
+
+- Added license.txt
+- Maintenance mode triggered only when migrations are needed
+- Throw exception if no netrc file is available
+- Callbacks can now output screen notifications
+
 ## 2.0.0.beta1
 
 - Callbacks are fired around deployment methods for an easy way to hook into

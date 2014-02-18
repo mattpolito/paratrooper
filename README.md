@@ -204,11 +204,13 @@ namespace :deploy do
     deployment = Paratrooper::Deploy.new("amazing-production-app") do |deploy|
       deploy.tag = 'production'
       deploy.match_tag = 'staging'
-      deploy.add_callback(:before_setup) do
+      deploy.add_callback(:before_setup) do |output|
+        output.display("Totally going to turn off newrelic")
         system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/disable -X POST -H "X-Api-Key: API_KEY"]
       end
-      deploy.add_callback(:after_teardown) do
+      deploy.add_callback(:after_teardown) do |output|
         system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/enable -X POST -H "X-Api-Key: API_KEY"]
+        output.display("Aaaannnd we're back")
       end
     end
 

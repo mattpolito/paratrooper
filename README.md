@@ -103,9 +103,7 @@ By providing tag options for Paratrooper, your code can be tagged and deployed f
 
 ### Staging example
 ```ruby
-  Paratrooper::Deploy.new("staging-app",
-    tag: 'staging'
-  )
+  Paratrooper::Deploy.new("staging-app", tag: 'staging')
 ```
 This will create/update a `staging` git tag at `HEAD`.
 
@@ -149,9 +147,7 @@ require 'paratrooper'
 namespace :deploy do
   desc 'Deploy app in staging environment'
   task :staging do
-    deployment = Paratrooper::Deploy.new("amazing-staging-app",
-      tag: 'staging'
-    )
+    deployment = Paratrooper::Deploy.new("amazing-staging-app", tag: 'staging')
 
     deployment.deploy
   end
@@ -162,7 +158,7 @@ namespace :deploy do
       deploy.tag              = 'production',
       deploy.match_tag        = 'staging',
       deploy.maintenance_mode = !ENV['NO_MAINTENANCE']
-    )
+    end
 
     deployment.deploy
   end

@@ -31,8 +31,12 @@ module Paratrooper
     end
 
     def run_migrations
-      data = heroku_api.post_ps(app_name, 'rake db:migrate', attach: 'true').body
-      rendezvous.start(:url => data['rendezvous_url'])
+      run_task('rake db:migrate')
+    end
+
+    def run_task(task_name)
+      data = heroku_api.post_ps(app_name, task_name, attach: 'true').body
+      rendezvous.start(url: data['rendezvous_url'])
     end
 
     def last_deploy_commit

@@ -192,7 +192,6 @@ to disable your application monitoring.
 
 ```ruby
 # lib/tasks/deploy.rake
-require 'paratrooper'
 
 namespace :deploy do
   desc 'Deploy app in production environment'
@@ -207,6 +206,26 @@ namespace :deploy do
       deploy.add_callback(:after_teardown) do |output|
         system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/enable -X POST -H "X-Api-Key: API_KEY"]
         output.display("Aaaannnd we're back")
+      end
+    end
+
+    deployment.deploy
+  end
+end
+```
+
+Or maybe you just want to run a rake task on your application
+
+```ruby
+# lib/tasks/deploy.rake
+
+namespace :deploy do
+  desc 'Deploy app in production environment'
+  task :production do
+    deployment = Paratrooper::Deploy.new("amazing-production-app") do |deploy|
+      deploy.add_callback(:after_teardown) do |output|
+        output.display("Running some task that needs to run")
+        deploy.add_remote_task("rake some:task:to:run")
       end
     end
 

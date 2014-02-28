@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0
+
+- Run remote tasks on your application
+
+## 2.0.0
+
+- Updated README with callback output
+
 ## 2.0.0.beta2
 
 - Added license.txt

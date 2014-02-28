@@ -175,6 +175,14 @@ module Paratrooper
     end
     alias_method :deploy, :default_deploy
 
+    # Public: Runs task on your heroku instance.
+    #
+    # task_name - String name of task to run on heroku instance
+    #
+    def add_remote_task(task_name)
+      heroku.run_task(task_name)
+    end
+
     private
     def app_url
       heroku.app_url

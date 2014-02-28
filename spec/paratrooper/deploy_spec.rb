@@ -382,5 +382,12 @@ describe Paratrooper::Deploy do
         end
       end
     end
+
+    describe "#add_remote_task" do
+      it "makes call to heroku to run task" do
+        expect(heroku).to receive(:run_task).with("rake some:task:to:run")
+        deployer.add_remote_task("rake some:task:to:run")
+      end
+    end
   end
 end

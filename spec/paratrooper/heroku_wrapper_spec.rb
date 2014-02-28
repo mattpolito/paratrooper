@@ -132,4 +132,12 @@ describe Paratrooper::HerokuWrapper do
       end
     end
   end
+
+  describe "#run_task" do
+    it 'calls into the heroku api' do
+      task = 'rake some:task:to:run'
+      expect(heroku_api).to receive(:post_ps).with(app_name, task, attach: 'true').and_return(double(body: ''))
+      wrapper.run_task(task)
+    end
+  end
 end

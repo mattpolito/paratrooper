@@ -11,9 +11,9 @@ module Paratrooper
   class Deploy
     include Callbacks
 
-    attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier
+    attr_accessor :app_name, :notifiers, :system_caller, :heroku, :protocol,
+                  :deployment_host, :migration_check, :debug, :screen_notifier
+    attr_writer   :tag_name, :match_tag_name
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -30,8 +30,9 @@ module Paratrooper
     #            :heroku           - Object wrapper around heroku-api (optional).
     #            :tag              - String name to be used as a git reference
     #                                point (optional).
-    #            :match_tag        - String name of git reference point to match
-    #                                :tag to (optional).
+    #            :match_tag        - String name of git reference point to
+    #                                match, it can be a branch, tag or SHA1
+    #                                (optional).
     #            :system_caller    - Object responsible for calling system
     #                                commands (optional).
     #            :protocol         - String web protocol to be used when pinging
@@ -48,7 +49,7 @@ module Paratrooper
       @notifiers       = options[:notifiers] || [@screen_notifier]
       @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name        = options[:tag]
-      @match_tag_name  = options[:match_tag] || 'master'
+      @match_tag_name  = options[:match_tag]
       @system_caller   = options[:system_caller] || SystemCaller.new(debug)
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
@@ -98,10 +99,11 @@ module Paratrooper
     # Public: Creates a git tag and pushes it to repository.
     #
     def update_repo_tag
-      unless tag_name.nil? || tag_name.empty?
+      if tag_name
         callback(:update_repo_tag) do
           notify(:update_repo_tag)
-          system_call "git tag #{tag_name} #{match_tag_name} -f"
+          commit_to_match = match_tag_name || current_branch_head
+          system_call "git tag #{tag_name} #{commit_to_match} -f"
           system_call "git push -f origin #{tag_name}"
         end
       end
@@ -110,8 +112,8 @@ module Paratrooper
     # Public: Pushes repository to Heroku.
     #
     def push_repo
-      reference_point = tag_name || 'master'
       callback(:push_repo) do
+        reference_point = tag_name || match_tag_name || current_branch_head
         notify(:push_repo, reference_point: reference_point)
         system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
       end
@@ -183,6 +185,20 @@ module Paratrooper
       heroku.run_task(task_name)
     end
 
+    # Public: Returns the name of the tag name if present
+    #
+    def tag_name
+      return @tag_name if !@tag_name.nil? && !@tag_name.empty?
+      nil
+    end
+
+    # Public: Returns the name of the tag name to match if present
+    #
+    def match_tag_name
+      return @match_tag_name if !@match_tag_name.nil? && !@match_tag_name.empty?
+      nil
+    end
+
     private
     def app_url
       heroku.app_url
@@ -236,7 +252,13 @@ module Paratrooper
     # call - String version of system command
     #
     def system_call(call)
-      system_caller.execute(call)
+      system_caller.execute(call).chomp
+    end
+
+    # Internal: Gets HEAD of the current branch
+    #
+    def current_branch_head
+      system_call "git rev-parse --abbrev-ref HEAD"
     end
   end
 end

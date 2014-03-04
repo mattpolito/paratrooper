@@ -198,7 +198,7 @@ describe Paratrooper::Deploy do
       let(:options) { { tag: 'awesome' } }
 
       before do
-        system_caller.stub(:execute)
+        system_caller.stub(execute: '')
       end
 
       it 'sends notification' do
@@ -219,7 +219,9 @@ describe Paratrooper::Deploy do
 
       context "when no deploy_tag is available" do
         it 'creates a git tag at HEAD' do
-          system_caller.should_receive(:execute).with('git tag awesome master -f')
+          system_caller.stub(:execute).with('git rev-parse --abbrev-ref HEAD')
+            .and_return('current_branch')
+          system_caller.should_receive(:execute).with('git tag awesome current_branch -f')
           deployer.update_repo_tag
         end
       end
@@ -243,19 +245,60 @@ describe Paratrooper::Deploy do
 
   describe "#push_repo" do
     before do
-      system_caller.stub(:execute)
+      system_caller.stub(execute: '')
     end
 
-    it 'sends notification' do
-      deployer.should_receive(:notify)
-        .with(:push_repo, reference_point: 'master').once
-      deployer.push_repo
+    context "when tag_name is available" do
+      let(:options) { {tag: 'awesome'} }
+
+      it 'sends notification' do
+        deployer.should_receive(:notify)
+          .with(:push_repo, reference_point: 'awesome').once
+        deployer.push_repo
+      end
+
+      it 'pushes repo to heroku' do
+        expected_call = 'git push -f git@heroku.com:app.git awesome:refs/heads/master'
+        system_caller.should_receive(:execute).with(expected_call)
+        deployer.push_repo
+      end
     end
 
-    it 'pushes repo to heroku' do
-      expected_call = 'git push -f git@heroku.com:app.git master:refs/heads/master'
-      system_caller.should_receive(:execute).with(expected_call)
-      deployer.push_repo
+    context "when tag_name is unavailable" do
+      let(:options) { {match_tag: 'master'} }
+
+        it 'sends notification' do
+          deployer.should_receive(:notify)
+            .with(:push_repo, reference_point: 'master').once
+          deployer.push_repo
+        end
+
+        it 'pushes repo to heroku' do
+          expected_call = 'git push -f git@heroku.com:app.git master:refs/heads/master'
+          system_caller.should_receive(:execute).with(expected_call)
+          deployer.push_repo
+        end
+
+      context "when match_tag is unavailable" do
+        let(:options) { Hash.new }
+
+        before do
+          system_caller.stub(:execute).
+            with('git rev-parse --abbrev-ref HEAD').and_return('current_branch')
+        end
+
+        it 'sends notification' do
+          deployer.should_receive(:notify)
+            .with(:push_repo, reference_point: 'current_branch').once
+          deployer.push_repo
+        end
+
+        it 'pushes repo to heroku' do
+          expected_call = 'git push -f git@heroku.com:app.git current_branch:refs/heads/master'
+          system_caller.should_receive(:execute).with(expected_call)
+          deployer.push_repo
+        end
+      end
     end
   end
 
@@ -328,7 +371,7 @@ describe Paratrooper::Deploy do
 
   describe "#warm_instance" do
     before do
-      system_caller.stub(:execute)
+      system_caller.stub(execute: '')
     end
 
     it 'sends notification' do
@@ -387,6 +430,58 @@ describe Paratrooper::Deploy do
       it "makes call to heroku to run task" do
         expect(heroku).to receive(:run_task).with("rake some:task:to:run")
         deployer.add_remote_task("rake some:task:to:run")
+      end
+    end
+  end
+
+  describe "#tag_name" do
+    context "when tag is unavailable" do
+      let(:options) { Hash.new }
+
+      it "returns nil" do
+        expect(deployer.tag_name).to be_nil
+      end
+    end
+
+    context "when the tag is available" do
+      let(:options) { {tag: 'production'} }
+
+      it "returns the specified value" do
+        expect(deployer.tag_name).to eq 'production'
+      end
+
+      context "when is an empty string" do
+        let(:options) { {tag: ''} }
+
+        it "returns nil" do
+          expect(deployer.tag_name).to be_nil
+        end
+      end
+    end
+  end
+
+  describe "#match_tag_name" do
+    context "when match_tag is unavailable" do
+      let(:options) { Hash.new }
+
+      it "returns nil" do
+        expect(deployer.match_tag_name).to be_nil
+      end
+    end
+
+    context "when match_tag is available" do
+      let(:options) { {match_tag: 'staging'} }
+
+      it "returns the specified value" do
+        expect(deployer.match_tag_name).to eq 'staging'
+      end
+
+      context "when is an empty string" do
+        let(:options) { {match_tag: ''} }
+
+        it "returns nil" do
+          expect(deployer.match_tag_name).to be_nil
+        end
       end
     end
   end

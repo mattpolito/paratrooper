@@ -105,7 +105,8 @@ By providing tag options for Paratrooper, your code can be tagged and deployed f
 ```ruby
   Paratrooper::Deploy.new("staging-app", tag: 'staging')
 ```
-This will create/update a `staging` git tag at `HEAD`.
+This will create/update a `staging` git tag at `HEAD` of the branch you are
+currently on.
 
 ### Production example
 ```ruby

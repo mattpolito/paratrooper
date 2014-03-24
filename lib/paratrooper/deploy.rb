@@ -13,10 +13,11 @@ module Paratrooper
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
       :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier
+      :screen_notifier, :branch_name
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
+    alias_method :branch=, :branch_name=
 
     # Public: Initializes a Deploy
     #
@@ -29,9 +30,13 @@ module Paratrooper
     #                                (optional).
     #            :heroku           - Object wrapper around heroku-api (optional).
     #            :tag              - String name to be used as a git reference
-    #                                point (optional).
+    #                                point for deploying from specific tag
+    #                                (optional).
     #            :match_tag        - String name of git reference point to match
     #                                :tag to (optional).
+    #            :branch           - String name to be used as a git reference
+    #                                point for deploying from specific branch
+    #                                (optional).
     #            :system_caller    - Object responsible for calling system
     #                                commands (optional).
     #            :protocol         - String web protocol to be used when pinging
@@ -48,6 +53,7 @@ module Paratrooper
       @notifiers       = options[:notifiers] || [@screen_notifier]
       @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name        = options[:tag]
+      @branch_name     = options[:branch]
       @match_tag_name  = options[:match_tag] || 'master'
       @system_caller   = options[:system_caller] || SystemCaller.new(debug)
       @protocol        = options[:protocol] || 'http'
@@ -109,8 +115,11 @@ module Paratrooper
 
     # Public: Pushes repository to Heroku.
     #
+    # Based on the following precedence:
+    # branch_name / tag_name / 'master'
+    #
     def push_repo
-      reference_point = tag_name || 'master'
+      reference_point = git_branch_name || git_tag_name || 'master'
       callback(:push_repo) do
         notify(:push_repo, reference_point: reference_point)
         system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
@@ -206,6 +215,14 @@ module Paratrooper
 
     def git_remote(host, name)
       "git@#{host}:#{name}.git"
+    end
+
+    def git_branch_name
+      "refs/heads/#{branch_name}" if branch_name
+    end
+
+    def git_tag_name
+      "refs/tags/#{tag_name}" if tag_name
     end
 
     def deployment_remote

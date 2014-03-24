@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+
+- Allow deploy from specific branch.
+
 ## 2.1.0
 
 - Run remote tasks on your application

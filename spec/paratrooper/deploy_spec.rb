@@ -48,6 +48,13 @@ describe Paratrooper::Deploy do
     end
   end
 
+  describe "branch=" do
+    specify "branch is set and @branch_name holds value" do
+      deployer.branch = "branch_name"
+      expect(deployer.branch_name).to eq("branch_name")
+    end
+  end
+
   describe "passing a block to initialize" do
     it "sets attributes on self" do
       deployer = described_class.new(app_name, default_options) do |p|
@@ -252,11 +259,38 @@ describe Paratrooper::Deploy do
       deployer.push_repo
     end
 
-    it 'pushes repo to heroku' do
-      expected_call = 'git push -f git@heroku.com:app.git master:refs/heads/master'
-      system_caller.should_receive(:execute).with(expected_call)
-      deployer.push_repo
+    context "when branch_name is available" do
+      before do
+        deployer.branch_name = "BRANCH_NAME"
+      end
+
+      it 'pushes branch_name to heroku' do
+        expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
+        system_caller.should_receive(:execute).with(expected_call)
+        deployer.push_repo
+      end
     end
+
+    context "when tag_name with no branch_name is available" do
+      before do
+        deployer.tag_name = "TAG_NAME"
+      end
+
+      it 'pushes branch_name to heroku' do
+        expected_call = 'git push -f git@heroku.com:app.git refs/tags/TAG_NAME:refs/heads/master'
+        system_caller.should_receive(:execute).with(expected_call)
+        deployer.push_repo
+      end
+    end
+
+    context "when no branch_name or tag_name" do
+      it 'pushes master repo to heroku' do
+        expected_call = 'git push -f git@heroku.com:app.git master:refs/heads/master'
+        system_caller.should_receive(:execute).with(expected_call)
+        deployer.push_repo
+      end
+    end
+
   end
 
   describe "#run_migrations" do

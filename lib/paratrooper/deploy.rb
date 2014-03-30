@@ -101,6 +101,12 @@ module Paratrooper
       end
     end
 
+    def maintenance_mode(&block)
+      activate_maintenance_mode
+      block.call if block_given?
+      deactivate_maintenance_mode
+    end
+
     # Public: Creates a git tag and pushes it to repository.
     #
     def update_repo_tag
@@ -173,12 +179,12 @@ module Paratrooper
     # Alias: #deploy
     def default_deploy
       setup
-      activate_maintenance_mode
       update_repo_tag
       push_repo
-      run_migrations
-      app_restart
-      deactivate_maintenance_mode
+      maintenance_mode do
+        run_migrations
+        app_restart
+      end
       warm_instance
       teardown
     end

@@ -183,7 +183,6 @@ module Paratrooper
       push_repo
       maintenance_mode do
         run_migrations
-        app_restart
       end
       warm_instance
       teardown

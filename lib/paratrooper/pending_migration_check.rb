@@ -11,9 +11,10 @@ module Paratrooper
     end
 
     def migrations_waiting?
+      return @migrations_waiting unless @migrations_waiting.nil?
       call = %Q[git diff --shortstat #{last_deployed_commit} #{match_tag_name} -- db/migrate]
       self.diff = system_caller.execute(call)
-      !diff.strip.empty?
+      @migrations_waiting = !diff.strip.empty?
     end
 
     def last_deployed_commit

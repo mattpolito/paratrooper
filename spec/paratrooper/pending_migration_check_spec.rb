@@ -21,6 +21,11 @@ describe Paratrooper::PendingMigrationCheck do
       migration_check.migrations_waiting?
     end
 
+    it "memoizes the git diff" do
+      system_caller.should_receive(:execute).exactly(1).times.and_return("DIFF")
+      migration_check.migrations_waiting?
+    end
+
     context "and migrations are in diff" do
       it "returns true" do
         expected_call = %Q[git diff --shortstat LAST_DEPLOYED_COMMIT MATCH -- db/migrate]

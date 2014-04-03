@@ -12,7 +12,8 @@ describe Paratrooper::Deploy do
       notifiers: [],
       system_caller: system_caller,
       migration_check: migration_check,
-      screen_notifier: screen_notifier
+      screen_notifier: screen_notifier,
+      http_client: http_client
     }
   end
   let(:options) { Hash.new }
@@ -33,6 +34,7 @@ describe Paratrooper::Deploy do
   let(:domain_response) do
     double(:domain_response, body: [{'domain' => 'application_url'}])
   end
+  let(:http_client) { double(:http_client).as_null_object }
 
   describe "tag=" do
     specify "tag is set and @tag_name holds value" do
@@ -371,8 +373,8 @@ describe Paratrooper::Deploy do
     end
 
     it 'pings application url' do
-      expected_call = 'curl -Il http://application_url'
-      system_caller.should_receive(:execute).with(expected_call)
+      expected_url = 'http://application_url'
+      expect(http_client).to receive(:get).with(expected_url)
       deployer.warm_instance(0)
     end
 
@@ -380,8 +382,8 @@ describe Paratrooper::Deploy do
       let(:options) { { protocol: 'https' } }
 
       it 'pings application url using the protocol' do
-        expected_call = 'curl -Il https://application_url'
-        system_caller.should_receive(:execute).with(expected_call)
+        expected_url = 'https://application_url'
+        expect(http_client).to receive(:get).with(expected_url)
         deployer.warm_instance(0)
       end
     end

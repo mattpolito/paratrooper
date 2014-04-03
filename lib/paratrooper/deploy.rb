@@ -3,6 +3,7 @@ require 'paratrooper/system_caller'
 require 'paratrooper/notifiers/screen_notifier'
 require 'paratrooper/pending_migration_check'
 require 'paratrooper/callbacks'
+require 'paratrooper/http_client_wrapper'
 
 module Paratrooper
 
@@ -13,7 +14,7 @@ module Paratrooper
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
       :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier, :branch_name
+      :screen_notifier, :branch_name, :http_client
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -23,30 +24,33 @@ module Paratrooper
     #
     # app_name - A String naming the Heroku application to be interacted with.
     # options  - The Hash options is used to provide additional functionality.
-    #            :screen_notifier  - Object used for outputting to screen
-    #                                (optional).
-    #            :notifiers        - Array of objects interested in being
-    #                                notified of steps in deployment process
-    #                                (optional).
-    #            :heroku           - Object wrapper around heroku-api (optional).
-    #            :tag              - String name to be used as a git reference
-    #                                point for deploying from specific tag
-    #                                (optional).
-    #            :match_tag        - String name of git reference point to match
-    #                                :tag to (optional).
-    #            :branch           - String name to be used as a git reference
-    #                                point for deploying from specific branch
-    #                                (optional).
-    #            :system_caller    - Object responsible for calling system
-    #                                commands (optional).
-    #            :protocol         - String web protocol to be used when pinging
-    #                                application (optional, default: 'http').
-    #            :deployment_host  - String host name to be used in git URL
-    #                                (optional, default: 'heroku.com').
-    #            :migration_check  - Object responsible for checking pending
-    #                                migrations (optional).
-    #            :api_key          - String version of heroku api key.
-    #                                (default: looks in local Netrc file).
+    #            :screen_notifier - Object used for outputting to screen
+    #                               (optional).
+    #            :notifiers       - Array of objects interested in being
+    #                               notified of steps in deployment process
+    #                               (optional).
+    #            :heroku          - Object wrapper around heroku-api (optional).
+    #            :tag             - String name to be used as a git reference
+    #                               point for deploying from specific tag
+    #                               (optional).
+    #            :match_tag       - String name of git reference point to match
+    #                               :tag to (optional).
+    #            :branch          - String name to be used as a git reference
+    #                               point for deploying from specific branch
+    #                               (optional).
+    #            :system_caller   - Object responsible for calling system
+    #                               commands (optional).
+    #            :protocol        - String web protocol to be used when pinging
+    #                               application (optional, default: 'http').
+    #            :deployment_host - String host name to be used in git URL
+    #                               (optional, default: 'heroku.com').
+    #            :migration_check - Object responsible for checking pending
+    #                               migrations (optional).
+    #            :api_key         - String version of heroku api key.
+    #                               (default: looks in local Netrc file).
+    #            :http_client     - Object responsible for making http calls
+    #                               (optional).
+    #
     def initialize(app_name, options = {}, &block)
       @app_name        = app_name
       @screen_notifier = options[:screen_notifier] || Notifiers::ScreenNotifier.new
@@ -60,6 +64,7 @@ module Paratrooper
       @deployment_host = options[:deployment_host] || 'heroku.com'
       @debug           = options[:debug] || false
       @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
+      @http_client     = options[:http_client] || HttpClientWrapper.new
 
       block.call(self) if block_given?
     end
@@ -155,7 +160,7 @@ module Paratrooper
       callback(:warm_instance) do
         notify(:warm_instance)
         sleep wait_time
-        system_call "curl -Il #{protocol}://#{app_url}"
+        http_client.get("#{protocol}://#{app_url}")
       end
     end
 
@@ -168,7 +173,7 @@ module Paratrooper
     # * Running database migrations
     # * Restarting application on Heroku
     # * Deactivating maintenance page
-    # * cURL'ing application URL to warm Heroku dyno
+    # * Accessing application URL to warm Heroku dyno
     #
     # Alias: #deploy
     def default_deploy

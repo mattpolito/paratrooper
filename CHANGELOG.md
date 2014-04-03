@@ -1,8 +1,12 @@
 # Changelog
 
+## 2.3.0
+
+- Http calls no longer being made from system cURL
+
 ## 2.2.0
 
-- Allow deploy from specific branch.
+- Allow deploy from specific branch
 
 ## 2.1.0
 

@@ -11,14 +11,19 @@ module Paratrooper
     end
 
     def migrations_waiting?
-      return @migrations_waiting unless @migrations_waiting.nil?
-      call = %Q[git diff --shortstat #{last_deployed_commit} #{match_tag_name} -- db/migrate]
-      self.diff = system_caller.execute(call)
-      @migrations_waiting = !diff.strip.empty?
+      @migrations_waiting ||= check_for_pending_migrations
     end
 
     def last_deployed_commit
       @last_deploy_commit ||= heroku.last_deploy_commit
+    end
+
+    private
+
+    def check_for_pending_migrations
+      call = %Q[git diff --shortstat #{last_deployed_commit} #{match_tag_name} -- db/migrate]
+      self.diff = system_caller.execute(call)
+      !diff.strip.empty?
     end
   end
 end

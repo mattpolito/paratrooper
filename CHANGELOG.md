@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.0
+
+- Maintenance mode only runs around migrations now
+- README updates around maintenance_mode=
+
 ## 2.3.0
 
 - Http calls no longer being made from system cURL

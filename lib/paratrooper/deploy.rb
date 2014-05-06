@@ -205,7 +205,7 @@ module Paratrooper
 
     private
     def app_url
-      heroku.app_url
+      heroku.app_url.sub(/\A\*\./, 'www.')
     end
 
     def callback(name, &block)

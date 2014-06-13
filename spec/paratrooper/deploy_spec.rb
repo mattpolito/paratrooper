@@ -127,8 +127,8 @@ describe Paratrooper::Deploy do
   end
 
   describe "#activate_maintenance_mode" do
-    context "when maintenance_mode option is 'true'" do
-      let(:options) { { maintenance_mode: true } }
+    context "when maintenance option is 'true'" do
+      let(:options) { { maintenance: true } }
 
       context "with pending migrations" do
         before do
@@ -160,6 +160,42 @@ describe Paratrooper::Deploy do
           heroku.should_not_receive(:app_maintenance_on)
           deployer.activate_maintenance_mode
         end
+      end
+    end
+
+    context "when maintenance option is false" do
+      let(:options) { { maintenance: false } }
+
+      before do
+        migration_check.stub(:migrations_waiting?).and_return(true)
+      end
+
+      it 'does not send notification' do
+        deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
+        deployer.activate_maintenance_mode
+      end
+
+      it "does not make a call to heroku to turn on maintenance mode" do
+        heroku.should_not_receive(:app_maintenance_on)
+        deployer.activate_maintenance_mode
+      end
+    end
+
+    context "when maintenance option is left as default" do
+      let(:options) { { } }
+
+      before do
+        migration_check.stub(:migrations_waiting?).and_return(true)
+      end
+
+      it 'does not send notification' do
+        deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
+        deployer.activate_maintenance_mode
+      end
+
+      it "does not make a call to heroku to turn on maintenance mode" do
+        heroku.should_not_receive(:app_maintenance_on)
+        deployer.activate_maintenance_mode
       end
     end
   end

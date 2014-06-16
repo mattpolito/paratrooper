@@ -132,12 +132,10 @@ You can use the object's methods any way you'd like, but we've provided a sensib
 
 This will perform the following tasks:
 
-* Activate maintenance mode
 * Create or update a git tag (if provided)
 * Push changes to Heroku
 * Run database migrations if any have been added to db/migrate
 * Restart the application
-* Deactivate maintenance mode
 * Warm application instance
 
 ### Example Usage
@@ -214,7 +212,7 @@ namespace :deploy do
 end
 ```
 
-Or maybe you just want to run a rake task on your application
+Or maybe you just want to run a rake task on your application. Since this task may take a moment to complete it's probably a good idea to throw up a maintenance page.
 
 ```ruby
 # lib/tasks/deploy.rake
@@ -223,6 +221,7 @@ namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
     deployment = Paratrooper::Deploy.new("amazing-production-app") do |deploy|
+      deploy.maintenance = true
       deploy.add_callback(:after_teardown) do |output|
         output.display("Running some task that needs to run")
         deploy.add_remote_task("rake some:task:to:run")

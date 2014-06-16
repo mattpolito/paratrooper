@@ -14,7 +14,7 @@ module Paratrooper
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
       :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier, :branch_name, :http_client
+      :screen_notifier, :branch_name, :http_client, :maintenance
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -46,6 +46,9 @@ module Paratrooper
     #                               (optional, default: 'heroku.com').
     #            :migration_check - Object responsible for checking pending
     #                               migrations (optional).
+    #            :maintenance     - If true, show maintenance page when pending
+    #                               migrations exists. False by default (optional).
+    #                               migrations (optional).
     #            :api_key         - String version of heroku api key.
     #                               (default: looks in local Netrc file).
     #            :http_client     - Object responsible for making http calls
@@ -65,6 +68,7 @@ module Paratrooper
       @debug           = options[:debug] || false
       @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
       @http_client     = options[:http_client] || HttpClientWrapper.new
+      @maintenance     = options[:maintenance] || false
 
       block.call(self) if block_given?
     end
@@ -89,7 +93,7 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      return unless pending_migrations?
+      return unless maintenance && pending_migrations?
       callback(:activate_maintenance_mode) do
         notify(:activate_maintenance_mode)
         heroku.app_maintenance_on

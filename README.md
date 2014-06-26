@@ -3,6 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/paratrooper.png)](http://badge.fury.io/rb/paratrooper)
 [![Build Status](https://travis-ci.org/mattpolito/paratrooper.png?branch=master)](https://travis-ci.org/mattpolito/paratrooper)
 [![Code Climate](https://codeclimate.com/github/mattpolito/paratrooper.png)](https://codeclimate.com/github/mattpolito/paratrooper)
+[![Gitter chat](https://badges.gitter.im/mattpolito/paratrooper.png)](https://gitter.im/mattpolito/paratrooper)
 
 Simplify your [Heroku][] deploy with quick and concise deployment rake tasks.
 

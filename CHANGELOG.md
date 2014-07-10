@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1
+
+- Fix Deploy#app_url for wildcard domains
+
 ## 2.4.0
 
 - Maintenance mode only runs around migrations now

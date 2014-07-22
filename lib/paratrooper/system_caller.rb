@@ -3,7 +3,7 @@ module Paratrooper
     attr_accessor :debug
 
     def initialize(debug = false)
-      self.debug = debug
+      @debug = debug
     end
 
     def execute(call)
@@ -12,8 +12,9 @@ module Paratrooper
     end
 
     private
+
     def debug_message_for(call)
-      p "DEBUG: #{call}" if debug
+      puts "DEBUG: #{call}" if debug
     end
   end
 end

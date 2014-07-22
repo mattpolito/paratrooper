@@ -62,15 +62,16 @@ module Paratrooper
       @tag_name        = options[:tag]
       @branch_name     = options[:branch]
       @match_tag_name  = options[:match_tag] || 'master'
-      @system_caller   = options[:system_caller] || SystemCaller.new(debug)
+      @debug           = options[:debug] || false
       @protocol        = options[:protocol] || 'http'
       @deployment_host = options[:deployment_host] || 'heroku.com'
-      @debug           = options[:debug] || false
-      @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
       @http_client     = options[:http_client] || HttpClientWrapper.new
       @maintenance     = options[:maintenance] || false
 
       block.call(self) if block_given?
+
+      @system_caller   = options[:system_caller] || SystemCaller.new(debug)
+      @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
     end
 
     # Public: Hook method called first in the deploy process.

@@ -68,7 +68,7 @@ describe Paratrooper::Deploy do
       end
       expect(deployer.match_tag_name).to eq("staging")
       expect(deployer.tag_name).to eq("production")
-      expect(deployer.debug).to be_true
+      expect(deployer.debug).to be(true)
       expect(deployer.deployment_host).to eq("HOST")
       expect(deployer.protocol).to eq("MOM")
     end

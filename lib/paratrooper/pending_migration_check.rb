@@ -11,7 +11,8 @@ module Paratrooper
     end
 
     def migrations_waiting?
-      @migrations_waiting ||= check_for_pending_migrations
+      defined?(@migrations_waiting) or @migrations_waiting = check_for_pending_migrations
+      @migrations_waiting
     end
 
     def last_deployed_commit

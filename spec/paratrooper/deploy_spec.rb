@@ -302,7 +302,7 @@ describe Paratrooper::Deploy do
 
     it 'sends notification' do
       deployer.should_receive(:notify)
-        .with(:push_repo, reference_point: 'master').once
+        .with(:push_repo, reference_point: 'HEAD').once
       deployer.push_repo
     end
 
@@ -332,7 +332,7 @@ describe Paratrooper::Deploy do
 
     context "when no branch_name or tag_name" do
       it 'pushes master repo to heroku' do
-        expected_call = 'git push -f git@heroku.com:app.git master:refs/heads/master'
+        expected_call = 'git push -f git@heroku.com:app.git HEAD:refs/heads/master'
         system_caller.should_receive(:execute).with(expected_call)
         deployer.push_repo
       end

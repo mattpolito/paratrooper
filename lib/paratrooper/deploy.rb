@@ -132,10 +132,10 @@ module Paratrooper
     # Public: Pushes repository to Heroku.
     #
     # Based on the following precedence:
-    # branch_name / tag_name / 'master'
+    # branch_name / tag_name / 'HEAD'
     #
     def push_repo
-      reference_point = git_branch_name || git_tag_name || 'master'
+      reference_point = git_branch_name || git_tag_name || 'HEAD'
       callback(:push_repo) do
         notify(:push_repo, reference_point: reference_point)
         system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"

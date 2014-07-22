@@ -72,6 +72,15 @@ describe Paratrooper::Deploy do
       expect(deployer.deployment_host).to eq("HOST")
       expect(deployer.protocol).to eq("MOM")
     end
+
+    it "lazy loads dependent options" do
+      deployer = described_class.new(app_name) do |p|
+        p.debug = true
+        p.match_tag = 'integration'
+      end
+      expect(deployer.system_caller.debug).to eq(true)
+      expect(deployer.migration_check.match_tag_name).to eq('integration')
+    end
   end
 
   describe "options" do

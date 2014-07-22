@@ -48,7 +48,12 @@ module Paratrooper
       end
 
       def push_repo(options = {})
-        display("Pushing #{options[:reference_point]} to Heroku")
+        desc = "#{options[:reference_point]} to #{options[:app_name]} on Heroku"
+        if options[:force]
+          display("Force pushing #{desc}")
+        else
+          display("Pushing #{desc}")
+        end
       end
 
       def run_migrations(options = {})

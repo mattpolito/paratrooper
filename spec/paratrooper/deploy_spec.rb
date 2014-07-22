@@ -302,7 +302,7 @@ describe Paratrooper::Deploy do
 
     it 'sends notification' do
       deployer.should_receive(:notify)
-        .with(:push_repo, reference_point: 'HEAD').once
+        .with(:push_repo, reference_point: 'HEAD', app_name: 'app', force: false).once
       deployer.push_repo
     end
 
@@ -312,7 +312,7 @@ describe Paratrooper::Deploy do
       end
 
       it 'pushes branch_name to heroku' do
-        expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
+        expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
         system_caller.should_receive(:execute).with(expected_call)
         deployer.push_repo
       end
@@ -324,20 +324,29 @@ describe Paratrooper::Deploy do
       end
 
       it 'pushes branch_name to heroku' do
-        expected_call = 'git push -f git@heroku.com:app.git refs/tags/TAG_NAME:refs/heads/master'
+        expected_call = 'git push git@heroku.com:app.git refs/tags/TAG_NAME:refs/heads/master'
         system_caller.should_receive(:execute).with(expected_call)
         deployer.push_repo
       end
     end
 
     context "when no branch_name or tag_name" do
-      it 'pushes master repo to heroku' do
-        expected_call = 'git push -f git@heroku.com:app.git HEAD:refs/heads/master'
+      it 'pushes HEAD repo to heroku' do
+        expected_call = 'git push git@heroku.com:app.git HEAD:refs/heads/master'
         system_caller.should_receive(:execute).with(expected_call)
         deployer.push_repo
       end
     end
 
+    context "when force flag is true" do
+      it 'force pushes to heroku' do
+        deployer.branch_name = "BRANCH_NAME"
+        deployer.force = true
+        expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
+        system_caller.should_receive(:execute).with(expected_call)
+        deployer.push_repo
+      end
+    end
   end
 
   describe "#run_migrations" do

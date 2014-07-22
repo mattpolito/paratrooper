@@ -14,7 +14,7 @@ module Paratrooper
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
       :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier, :branch_name, :http_client, :maintenance
+      :screen_notifier, :branch_name, :http_client, :maintenance, :force
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -38,6 +38,8 @@ module Paratrooper
     #            :branch          - String name to be used as a git reference
     #                               point for deploying from specific branch
     #                               (optional).
+    #            :force           - Force deploy using (-f flag) on deploy
+    #                               (optional, default: false)
     #            :system_caller   - Object responsible for calling system
     #                               commands (optional).
     #            :protocol        - String web protocol to be used when pinging
@@ -61,6 +63,7 @@ module Paratrooper
       @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name        = options[:tag]
       @branch_name     = options[:branch]
+      @force           = options[:force] || false
       @match_tag_name  = options[:match_tag] || 'master'
       @debug           = options[:debug] || false
       @protocol        = options[:protocol] || 'http'
@@ -137,8 +140,9 @@ module Paratrooper
     def push_repo
       reference_point = git_branch_name || git_tag_name || 'HEAD'
       callback(:push_repo) do
-        notify(:push_repo, reference_point: reference_point)
-        system_call "git push -f #{deployment_remote} #{reference_point}:refs/heads/master"
+        notify(:push_repo, reference_point: reference_point, app_name: app_name, force: force)
+        force_flag = force ? "-f " : ""
+        system_call "git push #{force_flag}#{deployment_remote} #{reference_point}:refs/heads/master"
       end
     end
 

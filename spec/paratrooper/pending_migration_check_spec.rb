@@ -24,6 +24,13 @@ describe Paratrooper::PendingMigrationCheck do
     it "memoizes the git diff" do
       system_caller.should_receive(:execute).exactly(1).times.and_return("DIFF")
       migration_check.migrations_waiting?
+      migration_check.migrations_waiting?
+    end
+
+    it "memoizes the git diff when empty" do
+      system_caller.should_receive(:execute).exactly(1).times.and_return("")
+      migration_check.migrations_waiting?
+      migration_check.migrations_waiting?
     end
 
     context "and migrations are in diff" do

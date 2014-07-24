@@ -68,9 +68,18 @@ describe Paratrooper::Deploy do
       end
       expect(deployer.match_tag_name).to eq("staging")
       expect(deployer.tag_name).to eq("production")
-      expect(deployer.debug).to be_true
+      expect(deployer.debug).to be(true)
       expect(deployer.deployment_host).to eq("HOST")
       expect(deployer.protocol).to eq("MOM")
+    end
+
+    it "lazy loads dependent options" do
+      deployer = described_class.new(app_name) do |p|
+        p.debug = true
+        p.match_tag = 'integration'
+      end
+      expect(deployer.system_caller.debug).to eq(true)
+      expect(deployer.migration_check.match_tag_name).to eq('integration')
     end
   end
 

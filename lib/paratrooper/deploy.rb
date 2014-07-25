@@ -14,7 +14,8 @@ module Paratrooper
 
     attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
       :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier, :branch_name, :http_client, :maintenance, :force
+      :screen_notifier, :branch_name, :http_client, :maintenance, :force,
+      :api_key
 
     alias_method :tag=, :tag_name=
     alias_method :match_tag=, :match_tag_name=
@@ -60,7 +61,6 @@ module Paratrooper
       @app_name        = app_name
       @screen_notifier = options[:screen_notifier] || Notifiers::ScreenNotifier.new
       @notifiers       = options[:notifiers] || [@screen_notifier]
-      @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options)
       @tag_name        = options[:tag]
       @branch_name     = options[:branch]
       @force           = options[:force] || false
@@ -70,9 +70,11 @@ module Paratrooper
       @deployment_host = options[:deployment_host] || 'heroku.com'
       @http_client     = options[:http_client] || HttpClientWrapper.new
       @maintenance     = options[:maintenance] || false
+      @api_key         = options[:api_key] || nil
 
       block.call(self) if block_given?
 
+      @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options.merge(api_key: api_key))
       @system_caller   = options[:system_caller] || SystemCaller.new(debug)
       @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
     end

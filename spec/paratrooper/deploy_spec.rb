@@ -60,11 +60,11 @@ describe Paratrooper::Deploy do
   describe "passing a block to initialize" do
     it "sets attributes on self" do
       deployer = described_class.new(app_name, default_options) do |p|
-        p.match_tag = "staging"
-        p.tag = "production"
-        p.debug = true
+        p.debug           = true
         p.deployment_host = "HOST"
-        p.protocol = "MOM"
+        p.match_tag       = "staging"
+        p.protocol        = "MOM"
+        p.tag             = "production"
       end
       expect(deployer.match_tag_name).to eq("staging")
       expect(deployer.tag_name).to eq("production")
@@ -74,8 +74,8 @@ describe Paratrooper::Deploy do
     end
 
     it "lazy loads dependent options" do
-      deployer = described_class.new(app_name) do |p|
-        p.debug = true
+      deployer = described_class.new(app_name, api_key: 'API_KEY') do |p|
+        p.debug     = true
         p.match_tag = 'integration'
       end
       expect(deployer.system_caller.debug).to eq(true)

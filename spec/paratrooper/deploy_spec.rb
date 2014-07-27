@@ -307,6 +307,15 @@ describe Paratrooper::Deploy do
     end
 
     context "when branch_name is available" do
+      context "and branch_name is passed as a symbol" do
+        it 'pushes branch_name to heroku' do
+          deployer.branch_name = :SYMBOL_BRANCH_NAME
+          expected_call = 'git push git@heroku.com:app.git refs/heads/SYMBOL_BRANCH_NAME:refs/heads/master'
+          system_caller.should_receive(:execute).with(expected_call)
+          deployer.push_repo
+        end
+      end
+
       it 'pushes branch_name to heroku' do
         deployer.branch_name = "BRANCH_NAME"
         expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'

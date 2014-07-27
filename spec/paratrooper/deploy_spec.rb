@@ -307,12 +307,16 @@ describe Paratrooper::Deploy do
     end
 
     context "when branch_name is available" do
-      before do
+      it 'pushes branch_name to heroku' do
         deployer.branch_name = "BRANCH_NAME"
+        expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
+        system_caller.should_receive(:execute).with(expected_call)
+        deployer.push_repo
       end
 
-      it 'pushes branch_name to heroku' do
-        expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
+      it 'supports pushing to HEAD (current branch)' do
+        deployer.branch_name = :head
+        expected_call = 'git push git@heroku.com:app.git HEAD:refs/heads/master'
         system_caller.should_receive(:execute).with(expected_call)
         deployer.push_repo
       end

@@ -37,7 +37,8 @@ module Paratrooper
     #            :match_tag       - String name of git reference point to match
     #                               :tag to (optional).
     #            :branch          - String name to be used as a git reference
-    #                               point for deploying from specific branch
+    #                               point for deploying from specific branch.
+    #                               Use :head to deploy from current branch
     #                               (optional).
     #            :force           - Force deploy using (-f flag) on deploy
     #                               (optional, default: false)
@@ -240,7 +241,9 @@ module Paratrooper
     end
 
     def git_branch_name
-      "refs/heads/#{branch_name}" if branch_name
+      if branch_name
+        branch_name == :head ? "HEAD" : "refs/heads/#{branch_name}"
+      end
     end
 
     def git_tag_name

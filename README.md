@@ -3,7 +3,6 @@
 [![Gem Version](http://img.shields.io/gem/v/paratrooper.svg?style=flat)](http://badge.fury.io/rb/paratrooper)
 [![Build Status](http://img.shields.io/travis/mattpolito/paratrooper/master.svg?style=flat)](https://travis-ci.org/mattpolito/paratrooper)
 [![Code Climate](http://img.shields.io/codeclimate/github/mattpolito/paratrooper.svg?style=flat)](https://codeclimate.com/github/mattpolito/paratrooper)
-[![Gitter chat](https://badges.gitter.im/mattpolito/paratrooper.png)](https://gitter.im/mattpolito/paratrooper)
 
 Simplify your [Heroku][] deploy with quick and concise deployment rake tasks.
 

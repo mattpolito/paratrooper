@@ -1,3 +1,8 @@
 *.gem
 bin/*
 Gemfile.lock
+
+.bundle
+.rspec
+.ruby-version
+.ruby-gemset

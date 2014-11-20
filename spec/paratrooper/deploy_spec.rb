@@ -141,32 +141,32 @@ describe Paratrooper::Deploy do
 
       context "with pending migrations" do
         before do
-          migration_check.stub(:migrations_waiting?).and_return(true)
+          allow(migration_check).to receive(:migrations_waiting?).and_return(true)
         end
 
         it 'sends notification' do
-          deployer.should_receive(:notify).with(:activate_maintenance_mode).once
+          expect(deployer).to receive(:notify).with(:activate_maintenance_mode).once
           deployer.activate_maintenance_mode
         end
 
         it "makes call to heroku to turn on maintenance mode" do
-          heroku.should_receive(:app_maintenance_on)
+          expect(heroku).to receive(:app_maintenance_on)
           deployer.activate_maintenance_mode
         end
       end
 
       context "without pending migrations" do
         before do
-          migration_check.stub(:migrations_waiting?).and_return(false)
+          allow(migration_check).to receive(:migrations_waiting?).and_return(false)
         end
 
         it 'does not send notification' do
-          deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
+          expect(deployer).to_not receive(:notify).with(:activate_maintenance_mode)
           deployer.activate_maintenance_mode
         end
 
         it "does not make a call to heroku to turn on maintenance mode" do
-          heroku.should_not_receive(:app_maintenance_on)
+          expect(heroku).to_not receive(:app_maintenance_on)
           deployer.activate_maintenance_mode
         end
       end
@@ -176,16 +176,16 @@ describe Paratrooper::Deploy do
       let(:options) { { maintenance: false } }
 
       before do
-        migration_check.stub(:migrations_waiting?).and_return(true)
+        allow(migration_check).to receive(:migrations_waiting?).and_return(true)
       end
 
       it 'does not send notification' do
-        deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
+        expect(deployer).to_not receive(:notify).with(:activate_maintenance_mode)
         deployer.activate_maintenance_mode
       end
 
       it "does not make a call to heroku to turn on maintenance mode" do
-        heroku.should_not_receive(:app_maintenance_on)
+        expect(heroku).to_not receive(:app_maintenance_on)
         deployer.activate_maintenance_mode
       end
     end
@@ -194,16 +194,16 @@ describe Paratrooper::Deploy do
       let(:options) { { } }
 
       before do
-        migration_check.stub(:migrations_waiting?).and_return(true)
+        allow(migration_check).to receive(:migrations_waiting?).and_return(true)
       end
 
       it 'does not send notification' do
-        deployer.should_not_receive(:notify).with(:activate_maintenance_mode)
+        expect(deployer).to_not receive(:notify).with(:activate_maintenance_mode)
         deployer.activate_maintenance_mode
       end
 
       it "does not make a call to heroku to turn on maintenance mode" do
-        heroku.should_not_receive(:app_maintenance_on)
+        expect(heroku).to_not receive(:app_maintenance_on)
         deployer.activate_maintenance_mode
       end
     end
@@ -215,32 +215,32 @@ describe Paratrooper::Deploy do
 
       context "with pending migrations" do
         before do
-          migration_check.stub(:migrations_waiting?).and_return(true)
+          allow(migration_check).to receive(:migrations_waiting?).and_return(true)
         end
 
         it 'sends notification' do
-          deployer.should_receive(:notify).with(:deactivate_maintenance_mode).once
+          expect(deployer).to receive(:notify).with(:deactivate_maintenance_mode).once
           deployer.deactivate_maintenance_mode
         end
 
         it "makes call to heroku to turn on maintenance mode" do
-          heroku.should_receive(:app_maintenance_off)
+          expect(heroku).to receive(:app_maintenance_off)
           deployer.deactivate_maintenance_mode
         end
       end
 
       context "without pending migrations" do
         before do
-          migration_check.stub(:migrations_waiting?).and_return(false)
+          allow(migration_check).to receive(:migrations_waiting?).and_return(false)
         end
 
         it 'does not send notification' do
-          deployer.should_not_receive(:notify).with(:deactivate_maintenance_mode)
+          expect(deployer).to_not receive(:notify).with(:deactivate_maintenance_mode)
           deployer.deactivate_maintenance_mode
         end
 
         it "does not make a call to heroku to turn on maintenance mode" do
-          heroku.should_not_receive(:app_maintenance_off)
+          expect(heroku).to_not receive(:app_maintenance_off)
           deployer.deactivate_maintenance_mode
         end
       end
@@ -252,11 +252,11 @@ describe Paratrooper::Deploy do
       let(:options) { { tag: 'awesome' } }
 
       before do
-        system_caller.stub(:execute)
+        allow(system_caller).to receive(:execute)
       end
 
       it 'sends notification' do
-        deployer.should_receive(:notify).with(:update_repo_tag).once
+        expect(deployer).to receive(:notify).with(:update_repo_tag).once
         deployer.update_repo_tag
       end
 
@@ -266,21 +266,21 @@ describe Paratrooper::Deploy do
         end
 
         it 'creates a git tag at deploy_tag reference point' do
-          system_caller.should_receive(:execute).with('git tag awesome deploy_this -f')
+          expect(system_caller).to receive(:execute).with('git tag awesome deploy_this -f')
           deployer.update_repo_tag
         end
       end
 
       context "when no deploy_tag is available" do
         it 'creates a git tag at HEAD' do
-          system_caller.should_receive(:execute).with('git tag awesome master -f')
+          expect(system_caller).to receive(:execute).with('git tag awesome master -f')
           deployer.update_repo_tag
         end
       end
 
       it 'pushes git tag' do
         expected = 'git push -f origin awesome'
-        system_caller.should_receive(:execute).with(expected)
+        expect(system_caller).to receive(:execute).with(expected)
         deployer.update_repo_tag
       end
     end
@@ -289,7 +289,7 @@ describe Paratrooper::Deploy do
       let(:options) { Hash.new }
 
       it 'no repo tags are created' do
-        system_caller.should_not_receive(:execute)
+        expect(system_caller).to_not receive(:execute)
         deployer.update_repo_tag
       end
     end
@@ -297,11 +297,11 @@ describe Paratrooper::Deploy do
 
   describe "#push_repo" do
     before do
-      system_caller.stub(:execute)
+      allow(system_caller).to receive(:execute)
     end
 
     it 'sends notification' do
-      deployer.should_receive(:notify)
+      expect(deployer).to receive(:notify)
         .with(:push_repo, reference_point: 'master', app_name: 'app', force: false).once
       deployer.push_repo
     end
@@ -311,7 +311,7 @@ describe Paratrooper::Deploy do
         it 'pushes branch_name to heroku' do
           deployer.branch_name = :SYMBOL_BRANCH_NAME
           expected_call = 'git push git@heroku.com:app.git refs/heads/SYMBOL_BRANCH_NAME:refs/heads/master'
-          system_caller.should_receive(:execute).with(expected_call)
+          expect(system_caller).to receive(:execute).with(expected_call)
           deployer.push_repo
         end
       end
@@ -319,14 +319,14 @@ describe Paratrooper::Deploy do
       it 'pushes branch_name to heroku' do
         deployer.branch_name = "BRANCH_NAME"
         expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
       end
 
       it 'supports pushing to HEAD (current branch)' do
         deployer.branch_name = :head
         expected_call = 'git push git@heroku.com:app.git HEAD:refs/heads/master'
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
       end
     end
@@ -338,7 +338,7 @@ describe Paratrooper::Deploy do
 
       it 'pushes branch_name to heroku' do
         expected_call = 'git push git@heroku.com:app.git refs/tags/TAG_NAME:refs/heads/master'
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
       end
     end
@@ -346,7 +346,7 @@ describe Paratrooper::Deploy do
     context "when no branch_name or tag_name" do
       it 'pushes master repo to heroku' do
         expected_call = 'git push git@heroku.com:app.git master:refs/heads/master'
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
       end
     end
@@ -356,7 +356,7 @@ describe Paratrooper::Deploy do
         deployer.branch_name = "BRANCH_NAME"
         deployer.force = true
         expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
       end
     end
@@ -364,32 +364,32 @@ describe Paratrooper::Deploy do
 
   describe "#run_migrations" do
     before do
-      system_caller.stub(:execute)
+      allow(system_caller).to receive(:execute)
     end
 
     context "when new migrations are waiting to be run" do
       before do
-        migration_check.stub(:migrations_waiting?).and_return(true)
+        allow(migration_check).to receive(:migrations_waiting?).and_return(true)
       end
 
       it 'sends notification' do
-        deployer.should_receive(:notify).with(:run_migrations).once
+        expect(deployer).to receive(:notify).with(:run_migrations).once
         deployer.run_migrations
       end
 
       it 'pushes repo to heroku' do
-        heroku.should_receive(:run_migrations)
+        expect(heroku).to receive(:run_migrations)
         deployer.run_migrations
       end
     end
 
     context "when no migrations are available to be run" do
       before do
-        migration_check.stub(:migrations_waiting?).and_return(false)
+        allow(migration_check).to receive(:migrations_waiting?).and_return(false)
       end
 
       specify "heroku is not notified to run migrations" do
-        heroku.should_not_receive(:run_migrations)
+        expect(heroku).to_not receive(:run_migrations)
         deployer.run_migrations
       end
     end
@@ -398,7 +398,7 @@ describe Paratrooper::Deploy do
   describe "#app_restart" do
     context 'when a restart is required due to pending migrations' do
       before do
-        migration_check.stub(:migrations_waiting?).and_return(true)
+        allow(migration_check).to receive(:migrations_waiting?).and_return(true)
       end
 
       it 'sends notification' do
@@ -414,7 +414,7 @@ describe Paratrooper::Deploy do
 
     context 'when a restart is not required' do
       before do
-        migration_check.stub(:migrations_waiting?).and_return(false)
+        allow(migration_check).to receive(:migrations_waiting?).and_return(false)
       end
 
       it 'does not send notification' do
@@ -431,11 +431,11 @@ describe Paratrooper::Deploy do
 
   describe "#warm_instance" do
     before do
-      system_caller.stub(:execute)
+      allow(system_caller).to receive(:execute)
     end
 
     it 'sends notification' do
-      deployer.should_receive(:notify).with(:warm_instance).once
+      expect(deployer).to receive(:notify).with(:warm_instance).once
       deployer.warm_instance(0)
     end
 
@@ -474,7 +474,7 @@ describe Paratrooper::Deploy do
             output.display("Whoo Hoo!")
           end
 
-          screen_notifier.stub(:display).with("Whoo Hoo!")
+          allow(screen_notifier).to receive(:display).with("Whoo Hoo!")
 
           deployer = described_class.new(app_name, default_options) do |p|
             p.add_callback(:before_setup, &callback)

@@ -33,7 +33,7 @@ describe Paratrooper::LocalApiKeyExtractor do
 
     context 'when environment variable is set' do
       before do
-        ENV.stub(:[]).with('HEROKU_API_KEY').and_return('ENV_API_KEY')
+        allow(ENV).to receive(:[]).with('HEROKU_API_KEY').and_return('ENV_API_KEY')
       end
 
       it 'returns credentials' do
@@ -43,8 +43,7 @@ describe Paratrooper::LocalApiKeyExtractor do
 
     context 'when environment variable is not set' do
       before do
-        ENV.stub(:[])
-        ENV.stub(:[]).with('HEROKU_API_KEY').and_return(nil)
+        allow(ENV).to receive(:[]).with('HEROKU_API_KEY').and_return(nil)
       end
 
       it 'returns credentials from local file' do

@@ -45,35 +45,35 @@ describe Paratrooper::HerokuWrapper do
 
   describe '#app_restart' do
     it "calls down to heroku api" do
-      heroku_api.should_receive(:post_ps_restart).with(app_name)
+      expect(heroku_api).to receive(:post_ps_restart).with(app_name)
       wrapper.app_restart
     end
   end
 
   describe '#app_maintenance_off' do
     it "calls down to heroku api" do
-      heroku_api.should_receive(:post_app_maintenance).with(app_name, '0')
+      expect(heroku_api).to receive(:post_app_maintenance).with(app_name, '0')
       wrapper.app_maintenance_off
     end
   end
 
   describe '#app_maintenance_on' do
     it "calls down to heroku api" do
-      heroku_api.should_receive(:post_app_maintenance).with(app_name, '1')
+      expect(heroku_api).to receive(:post_app_maintenance).with(app_name, '1')
       wrapper.app_maintenance_on
     end
   end
 
   describe '#run_migrations' do
     it 'calls into the heroku api' do
-      heroku_api.should_receive(:post_ps).with(app_name, 'rake db:migrate', attach: 'true').and_return(double(body: ''))
+      expect(heroku_api).to receive(:post_ps).with(app_name, 'rake db:migrate', attach: 'true').and_return(double(body: ''))
       wrapper.run_migrations
     end
 
     it 'uses waits for db migrations to run using rendezvous' do
       data = { 'rendezvous_url' => 'the_url' }
-      heroku_api.stub_chain(:post_ps, :body).and_return(data)
-      rendezvous.should_receive(:start).with(:url => data['rendezvous_url'])
+      allow(heroku_api).to receive_message_chain(:post_ps, :body).and_return(data)
+      expect(rendezvous).to receive(:start).with(:url => data['rendezvous_url'])
       wrapper.run_migrations
     end
   end
@@ -83,7 +83,7 @@ describe Paratrooper::HerokuWrapper do
       let(:response) { double(:response, body: [{'domain' => 'APP_URL'}]) }
 
       it "calls down to heroku api" do
-        heroku_api.should_receive(:get_domains).with(app_name).and_return(response)
+        expect(heroku_api).to receive(:get_domains).with(app_name).and_return(response)
         wrapper.app_url
       end
     end
@@ -98,11 +98,11 @@ describe Paratrooper::HerokuWrapper do
       end
 
       before do
-        heroku_api.stub(:get_domains).and_return(domain_response)
+        allow(heroku_api).to receive(:get_domains).and_return(domain_response)
       end
 
       it "makes call to get default heroku app url" do
-        heroku_api.should_receive(:get_app).with(app_name).and_return(response)
+        expect(heroku_api).to receive(:get_app).with(app_name).and_return(response)
         expect(wrapper.app_url).to eq('APP_URL')
       end
     end
@@ -114,7 +114,7 @@ describe Paratrooper::HerokuWrapper do
         double(:response, body: [{ 'commit' => 'SHA' }])
       end
       it "returns string of last deployed commit" do
-        heroku_api.should_receive(:get_releases).with(app_name)
+        expect(heroku_api).to receive(:get_releases).with(app_name)
           .and_return(response)
         expect(wrapper.last_deploy_commit).to eq('SHA')
       end
@@ -126,7 +126,7 @@ describe Paratrooper::HerokuWrapper do
       end
 
       it "returns nil" do
-        heroku_api.should_receive(:get_releases).with(app_name)
+        expect(heroku_api).to receive(:get_releases).with(app_name)
           .and_return(response)
         expect(wrapper.last_deploy_commit).to eq(nil)
       end

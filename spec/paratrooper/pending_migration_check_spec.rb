@@ -16,19 +16,19 @@ describe Paratrooper::PendingMigrationCheck do
     let(:last_deployed_commit) { "LAST_DEPLOYED_COMMIT" }
 
     it "calls out to heroku for latest deploy's commit" do
-      system_caller.stub(:execute).and_return("")
-      heroku_wrapper.should_receive(:last_deploy_commit)
+      allow(system_caller).to receive(:execute).and_return("")
+      expect(heroku_wrapper).to receive(:last_deploy_commit)
       migration_check.migrations_waiting?
     end
 
     it "memoizes the git diff" do
-      system_caller.should_receive(:execute).exactly(1).times.and_return("DIFF")
+      expect(system_caller).to receive(:execute).exactly(1).times.and_return("DIFF")
       migration_check.migrations_waiting?
       migration_check.migrations_waiting?
     end
 
     it "memoizes the git diff when empty" do
-      system_caller.should_receive(:execute).exactly(1).times.and_return("")
+      expect(system_caller).to receive(:execute).exactly(1).times.and_return("")
       migration_check.migrations_waiting?
       migration_check.migrations_waiting?
     end
@@ -36,7 +36,7 @@ describe Paratrooper::PendingMigrationCheck do
     context "and migrations are in diff" do
       it "returns true" do
         expected_call = %Q[git diff --shortstat LAST_DEPLOYED_COMMIT MATCH -- db/migrate]
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
           .and_return("DIFF")
         expect(migration_check.migrations_waiting?).to be(true)
       end
@@ -48,7 +48,7 @@ describe Paratrooper::PendingMigrationCheck do
 
       it "returns false" do
         expected_call = %Q[git diff --shortstat LAST_DEPLOYED_COMMIT master -- db/migrate]
-        system_caller.should_receive(:execute).with(expected_call)
+        expect(system_caller).to receive(:execute).with(expected_call)
           .and_return("")
         expect(migration_check.migrations_waiting?).to be(false)
       end

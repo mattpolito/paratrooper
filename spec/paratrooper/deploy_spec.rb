@@ -8,7 +8,7 @@ describe Paratrooper::Deploy do
   let(:app_name) { 'app' }
   let(:default_options) do
     {
-      heroku: heroku,
+      heroku_wrapper: heroku,
       notifiers: [],
       system_caller: system_caller,
       migration_check: migration_check,
@@ -36,50 +36,51 @@ describe Paratrooper::Deploy do
   end
   let(:http_client) { double(:http_client).as_null_object }
 
-  describe "tag=" do
-    specify "tag is set and @tag_name holds value" do
-      deployer.tag = "tag_name"
-      expect(deployer.tag_name).to eq("tag_name")
-    end
+  before do
+    allow(screen_notifier).to receive(:notify)
   end
 
-  describe "match_tag_to=" do
-    specify "match_tag is set and @match_tag_name holds value" do
-      deployer.match_tag = "staging"
-      expect(deployer.match_tag_name).to eq("staging")
-    end
-  end
+  # describe "tag=" do
+  #   specify "tag is set and @tag_name holds value" do
+  #     deployer.tag = "tag_name"
+  #     expect(deployer.tag_name).to eq("tag_name")
+  #   end
+  # end
 
-  describe "branch=" do
-    specify "branch is set and @branch_name holds value" do
-      deployer.branch = "branch_name"
-      expect(deployer.branch_name).to eq("branch_name")
-    end
-  end
+  # describe "match_tag_to=" do
+  #   specify "match_tag is set and @match_tag_name holds value" do
+  #     deployer.match_tag = "staging"
+  #     expect(deployer.match_tag_name).to eq("staging")
+  #   end
+  # end
+
+  # describe "branch=" do
+  #   specify "branch is set and @branch_name holds value" do
+  #     deployer.branch = "branch_name"
+  #     expect(deployer.branch_name).to eq("branch_name")
+  #   end
+  # end
 
   describe "passing a block to initialize" do
     it "sets attributes on self" do
       deployer = described_class.new(app_name, default_options) do |p|
-        p.debug           = true
         p.deployment_host = "HOST"
         p.match_tag       = "staging"
         p.protocol        = "MOM"
         p.tag             = "production"
       end
-      expect(deployer.match_tag_name).to eq("staging")
-      expect(deployer.tag_name).to eq("production")
-      expect(deployer.debug).to be(true)
-      expect(deployer.deployment_host).to eq("HOST")
-      expect(deployer.protocol).to eq("MOM")
+      expect(deployer.configuration.match_tag_name).to eq("staging")
+      expect(deployer.configuration.tag_name).to eq("production")
+      expect(deployer.configuration.deployment_host).to eq("HOST")
+      expect(deployer.configuration.protocol).to eq("MOM")
     end
 
     it "lazy loads dependent options" do
       deployer = described_class.new(app_name, api_key: 'API_KEY') do |p|
-        p.debug     = true
         p.match_tag = 'integration'
       end
-      expect(deployer.system_caller.debug).to eq(true)
-      expect(deployer.migration_check.match_tag_name).to eq('integration')
+      expect(deployer.configuration.api_key).to eq('API_KEY')
+      expect(deployer.configuration.match_tag_name).to eq('integration')
     end
   end
 
@@ -88,7 +89,7 @@ describe Paratrooper::Deploy do
       let(:options) { { tag: 'tag_name' } }
 
       it "and responds to #tag_name" do
-        expect(deployer.tag_name).to eq('tag_name')
+        expect(deployer.configuration.tag_name).to eq('tag_name')
       end
     end
 
@@ -97,7 +98,7 @@ describe Paratrooper::Deploy do
       let(:heroku) { double(:heroku) }
 
       it "and responds to #heroku" do
-        expect(deployer.heroku).to eq(heroku)
+        expect(deployer.configuration.heroku).to eq(heroku)
       end
     end
 
@@ -106,7 +107,7 @@ describe Paratrooper::Deploy do
       let(:notifiers) { double(:notifier) }
 
       it "and responds to #notifiers" do
-        expect(deployer.notifiers).to eq([notifiers])
+        expect(deployer.configuration.notifiers).to eq([notifiers])
       end
     end
 
@@ -115,13 +116,13 @@ describe Paratrooper::Deploy do
         let(:options) { { protocol: 'https' } }
 
         it "and responds to #protocol" do
-          expect(deployer.protocol).to eq('https')
+          expect(deployer.configuration.protocol).to eq('https')
         end
       end
 
       context "no value passed" do
         it "and responds to #protocol with default value" do
-          expect(deployer.protocol).to eq('http')
+          expect(deployer.configuration.protocol).to eq('http')
         end
       end
     end
@@ -130,7 +131,7 @@ describe Paratrooper::Deploy do
       let(:options) { { deployment_host: 'host_name' } }
 
       it "and responds to #notifiers" do
-        expect(deployer.deployment_host).to eq('host_name')
+        expect(deployer.configuration.deployment_host).to eq('host_name')
       end
     end
   end
@@ -309,7 +310,7 @@ describe Paratrooper::Deploy do
     context "when branch_name is available" do
       context "and branch_name is passed as a symbol" do
         it 'pushes branch_name to heroku' do
-          deployer.branch_name = :SYMBOL_BRANCH_NAME
+          deployer.configuration.branch_name = :SYMBOL_BRANCH_NAME
           expected_call = 'git push git@heroku.com:app.git refs/heads/SYMBOL_BRANCH_NAME:refs/heads/master'
           expect(system_caller).to receive(:execute).with(expected_call)
           deployer.push_repo
@@ -317,14 +318,14 @@ describe Paratrooper::Deploy do
       end
 
       it 'pushes branch_name to heroku' do
-        deployer.branch_name = "BRANCH_NAME"
+        deployer.configuration.branch_name = "BRANCH_NAME"
         expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
         expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
       end
 
       it 'supports pushing to HEAD (current branch)' do
-        deployer.branch_name = :head
+        deployer.configuration.branch_name = :head
         expected_call = 'git push git@heroku.com:app.git HEAD:refs/heads/master'
         expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
@@ -333,7 +334,7 @@ describe Paratrooper::Deploy do
 
     context "when tag_name with no branch_name is available" do
       before do
-        deployer.tag_name = "TAG_NAME"
+        deployer.configuration.tag_name = "TAG_NAME"
       end
 
       it 'pushes branch_name to heroku' do
@@ -353,8 +354,9 @@ describe Paratrooper::Deploy do
 
     context "when force flag is true" do
       it 'force pushes to heroku' do
-        deployer.branch_name = "BRANCH_NAME"
-        deployer.force = true
+        allow(screen_notifier).to receive(:notify)
+        deployer.configuration.branch_name = "BRANCH_NAME"
+        deployer.configuration.force = true
         expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
         expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo
@@ -465,7 +467,7 @@ describe Paratrooper::Deploy do
           p.add_callback(:before_setup, &callback)
         end
 
-        expect(deployer.callbacks[:before_setup]).to eq([callback])
+        expect(deployer.configuration.callbacks[:before_setup]).to eq([callback])
       end
 
       context "when messaging is added to callback" do

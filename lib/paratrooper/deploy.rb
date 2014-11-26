@@ -1,25 +1,20 @@
-require 'paratrooper/heroku_wrapper'
-require 'paratrooper/system_caller'
-require 'paratrooper/notifiers/screen_notifier'
+require 'paratrooper/configuration'
 require 'paratrooper/pending_migration_check'
-require 'paratrooper/callbacks'
-require 'paratrooper/http_client_wrapper'
 
 module Paratrooper
 
   # Public: Entry point into the library.
   #
   class Deploy
-    include Callbacks
 
-    attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
-      :match_tag_name, :protocol, :deployment_host, :migration_check, :debug,
-      :screen_notifier, :branch_name, :http_client, :maintenance, :force,
-      :api_key
+    # attr_accessor :app_name, :notifiers, :system_caller, :heroku, :tag_name,
+    #   :match_tag_name, :protocol, :deployment_host, :migration_check,
+    #   :screen_notifier, :branch_name, :http_client, :maintenance, :force,
+    #   :api_key
 
-    alias_method :tag=, :tag_name=
-    alias_method :match_tag=, :match_tag_name=
-    alias_method :branch=, :branch_name=
+    # alias_method :tag=, :tag_name=
+    # alias_method :match_tag=, :match_tag_name=
+    # alias_method :branch=, :branch_name=
 
     # Public: Initializes a Deploy
     #
@@ -59,25 +54,12 @@ module Paratrooper
     #                               (optional).
     #
     def initialize(app_name, options = {}, &block)
-      @app_name        = app_name
-      @screen_notifier = options[:screen_notifier] || Notifiers::ScreenNotifier.new
-      @notifiers       = options[:notifiers] || [@screen_notifier]
-      @tag_name        = options[:tag]
-      @branch_name     = options[:branch]
-      @force           = options[:force] || false
-      @match_tag_name  = options[:match_tag] || 'master'
-      @debug           = options[:debug] || false
-      @protocol        = options[:protocol] || 'http'
-      @deployment_host = options[:deployment_host] || 'heroku.com'
-      @http_client     = options[:http_client] || HttpClientWrapper.new
-      @maintenance     = options[:maintenance] || false
-      @api_key         = options[:api_key] || nil
+      configuration.attributes = options.merge(app_name: app_name)
+      block.call(configuration) if block_given?
+    end
 
-      block.call(self) if block_given?
-
-      @heroku          = options[:heroku] || HerokuWrapper.new(app_name, options.merge(api_key: api_key))
-      @system_caller   = options[:system_caller] || SystemCaller.new(debug)
-      @migration_check = options[:migration_check] || PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
+    def configuration
+      @configuration ||= Configuration.new
     end
 
     # Public: Hook method called first in the deploy process.
@@ -85,7 +67,7 @@ module Paratrooper
     def setup
       callback(:setup) do
         notify(:setup)
-        migration_check.last_deployed_commit
+        configuration.migration_check.last_deployed_commit
       end
     end
 
@@ -100,10 +82,10 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      return unless maintenance && pending_migrations?
+      return unless configuration.maintenance && pending_migrations?
       callback(:activate_maintenance_mode) do
         notify(:activate_maintenance_mode)
-        heroku.app_maintenance_on
+        configuration.heroku.app_maintenance_on
       end
     end
 
@@ -113,7 +95,7 @@ module Paratrooper
       return unless pending_migrations?
       callback(:deactivate_maintenance_mode) do
         notify(:deactivate_maintenance_mode)
-        heroku.app_maintenance_off
+        configuration.heroku.app_maintenance_off
       end
     end
 
@@ -126,11 +108,11 @@ module Paratrooper
     # Public: Creates a git tag and pushes it to repository.
     #
     def update_repo_tag
-      unless tag_name.nil? || tag_name.empty?
+      unless configuration.tag_name.nil? || configuration.tag_name.empty?
         callback(:update_repo_tag) do
           notify(:update_repo_tag)
-          system_call "git tag #{tag_name} #{match_tag_name} -f"
-          system_call "git push -f origin #{tag_name}"
+          system_call "git tag #{configuration.tag_name} #{configuration.match_tag_name} -f"
+          system_call "git push -f origin #{configuration.tag_name}"
         end
       end
     end
@@ -143,8 +125,8 @@ module Paratrooper
     def push_repo
       reference_point = git_branch_name || git_tag_name || 'master'
       callback(:push_repo) do
-        notify(:push_repo, reference_point: reference_point, app_name: app_name, force: force)
-        force_flag = force ? "-f " : ""
+        notify(:push_repo, reference_point: reference_point, app_name: configuration.app_name, force: configuration.force)
+        force_flag = configuration.force ? "-f " : ""
         system_call "git push #{force_flag}#{deployment_remote} #{reference_point}:refs/heads/master"
       end
     end
@@ -155,7 +137,7 @@ module Paratrooper
       return unless pending_migrations?
       callback(:run_migrations) do
         notify(:run_migrations)
-        heroku.run_migrations
+        configuration.heroku.run_migrations
       end
     end
 
@@ -165,7 +147,7 @@ module Paratrooper
       return unless restart_required?
       callback(:app_restart) do
         notify(:app_restart)
-        heroku.app_restart
+        configuration.heroku.app_restart
       end
     end
 
@@ -178,7 +160,7 @@ module Paratrooper
       callback(:warm_instance) do
         notify(:warm_instance)
         sleep wait_time
-        http_client.get("#{protocol}://#{app_url}")
+        configuration.http_client.get("#{configuration.protocol}://#{app_url}")
       end
     end
 
@@ -212,27 +194,27 @@ module Paratrooper
     # task_name - String name of task to run on heroku instance
     #
     def add_remote_task(task_name)
-      heroku.run_task(task_name)
+      configuration.heroku.run_task(task_name)
     end
 
     private
     def app_url
-      heroku.app_url.sub(/\A\*\./, 'www.')
+      configuration.heroku.app_url.sub(/\A\*\./, 'www.')
     end
 
     def callback(name, &block)
-      build_callback(name, screen_notifier, &block)
+      configuration.build_callback(name, configuration.screen_notifier, &block)
     end
 
     # Internal: Payload data to be sent with notifications
     #
     def default_payload
       {
-        app_name: app_name,
+        app_name: configuration.app_name,
         app_url: app_url,
         deployment_remote: deployment_remote,
-        tag_name: tag_name,
-        match_tag: match_tag_name
+        tag_name: configuration.tag_name,
+        match_tag: configuration.match_tag_name
       }
     end
 
@@ -241,17 +223,17 @@ module Paratrooper
     end
 
     def git_branch_name
-      if branch_name
-        branch_name == :head ? "HEAD" : "refs/heads/#{branch_name}"
+      if configuration.branch_name
+        configuration.branch_name == :head ? "HEAD" : "refs/heads/#{configuration.branch_name}"
       end
     end
 
     def git_tag_name
-      "refs/tags/#{tag_name}" if tag_name
+      "refs/tags/#{configuration.tag_name}" if configuration.tag_name
     end
 
     def deployment_remote
-      git_remote(deployment_host, app_name)
+      git_remote(configuration.deployment_host, configuration.app_name)
     end
 
     # Internal: Notifies other objects that an event has occurred
@@ -260,13 +242,13 @@ module Paratrooper
     # options - Hash of options to be sent as data payload
     #
     def notify(step, options = {})
-      notifiers.each do |notifier|
+      configuration.notifiers.each do |notifier|
         notifier.notify(step, default_payload.merge(options))
       end
     end
 
     def pending_migrations?
-      migration_check.migrations_waiting?
+      configuration.migration_check.migrations_waiting?
     end
 
     def restart_required?
@@ -278,7 +260,7 @@ module Paratrooper
     # call - String version of system command
     #
     def system_call(call)
-      system_caller.execute(call)
+      configuration.system_caller.execute(call)
     end
   end
 end

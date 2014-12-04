@@ -125,8 +125,8 @@ module Paratrooper
     def push_repo
       reference_point = git_branch_name || git_tag_name || 'master'
       callback(:push_repo) do
-        notify(:push_repo, reference_point: reference_point, app_name: configuration.app_name, force: configuration.force)
-        force_flag = configuration.force ? "-f " : ""
+        notify(:push_repo, reference_point: reference_point, app_name: configuration.app_name, force_push: configuration.force_push)
+        force_flag = configuration.force_push ? "-f " : ""
         system_call "git push #{force_flag}#{deployment_remote} #{reference_point}:refs/heads/master"
       end
     end

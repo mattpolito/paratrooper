@@ -8,7 +8,7 @@ describe Paratrooper::Deploy do
   let(:app_name) { 'app' }
   let(:default_options) do
     {
-      heroku_wrapper: heroku,
+      heroku: heroku,
       notifiers: [],
       system_caller: system_caller,
       migration_check: migration_check,
@@ -93,8 +93,8 @@ describe Paratrooper::Deploy do
       end
     end
 
-    context "accepts :heroku_auth" do
-      let(:options) { { heroku_auth: heroku } }
+    context "accepts :heroku" do
+      let(:options) { { heroku: heroku } }
       let(:heroku) { double(:heroku) }
 
       it "and responds to #heroku" do
@@ -212,7 +212,7 @@ describe Paratrooper::Deploy do
 
   describe "#deactivate_maintenance_mode" do
     context "when maintenance_mode option is 'true'" do
-      let(:options) { { maintenance_mode: true } }
+      let(:options) { { maintenance: true } }
 
       context "with pending migrations" do
         before do
@@ -303,7 +303,7 @@ describe Paratrooper::Deploy do
 
     it 'sends notification' do
       expect(deployer).to receive(:notify)
-        .with(:push_repo, reference_point: 'master', app_name: 'app', force: false).once
+        .with(:push_repo, reference_point: 'master', app_name: 'app', force_push: false).once
       deployer.push_repo
     end
 
@@ -356,7 +356,7 @@ describe Paratrooper::Deploy do
       it 'force pushes to heroku' do
         allow(screen_notifier).to receive(:notify)
         deployer.configuration.branch_name = "BRANCH_NAME"
-        deployer.configuration.force = true
+        deployer.configuration.force_push = true
         expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
         expect(system_caller).to receive(:execute).with(expected_call)
         deployer.push_repo

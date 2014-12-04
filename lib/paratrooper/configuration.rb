@@ -1,21 +1,20 @@
-# require 'paratrooper/heroku_wrapper'
+require 'paratrooper/heroku_wrapper'
 require 'paratrooper/http_client_wrapper'
 require 'paratrooper/system_caller'
 require 'paratrooper/callbacks'
+require 'paratrooper/pending_migration_check'
 
 module Paratrooper
   class Configuration
     include Callbacks
 
-    attr_accessor :app_name, :tag_name, :branch_name, :maintenance_mode
-    attr_writer :api_key, :deployment_host, :force, :heroku_wrapper,
-      :http_client, :maintenance, :match_tag_name, :migration_check,
-      :protocol, :screen_notifier, :system_caller
+    attr_accessor :tag_name, :branch_name, :app_name, :api_key
+    attr_writer :match_tag_name, :protocol, :heroku, :migration_check,
+      :system_caller, :deployment_host, :http_client, :screen_notifier
 
     alias :branch= :branch_name=
     alias :match_tag= :match_tag_name=
     alias :tag= :tag_name=
-    alias :heroku_auth= :heroku_wrapper=
 
     def attributes=(attrs)
       attrs.each do |method, value|
@@ -28,13 +27,12 @@ module Paratrooper
     end
 
     def migration_check
-      @migration_check ||= PendingMigrationCheck.new(match_tag_name, heroku_wrapper, system_caller)
+      @migration_check ||= PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
     end
 
-    def heroku_wrapper
-      @heroku_wrapper ||= HerokuWrapper.new(app_name, options.merge(api_key: api_key))
+    def heroku
+      @heroku ||= HerokuWrapper.new(app_name)
     end
-    alias :heroku :heroku_wrapper
 
     def screen_notifier
       @screen_notifier ||= Notifiers::ScreenNotifier.new
@@ -48,9 +46,9 @@ module Paratrooper
       @notifiers ||= [@screen_notifier]
     end
 
-    def force
-      @force ||= false
-    end
+    # def force
+    #   @force ||= false
+    # end
 
     def protocol
       @protocol ||= 'http'
@@ -68,8 +66,24 @@ module Paratrooper
       @maintenance ||= false
     end
 
-    def api_key
-      @api_key ||= nil
+    def maintenance=(val)
+      @maintenance = !!val
+    end
+
+    def maintenance?
+      @maintenance
+    end
+
+    def force_push=(val)
+      @force_push= !!val
+    end
+
+    def force_push
+      @force_push ||= false
+    end
+
+    def force_push?
+      @force_push
     end
 
     def system_caller

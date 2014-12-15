@@ -13,6 +13,10 @@ module Paratrooper
 
     attr_writer :config
 
+    def self.call(app_name, options = {}, &block)
+      new(app_name, options, &block).deploy
+    end
+
     # Public: Initializes a Deploy
     #
     # app_name - A String naming the Heroku application to be interacted with.
@@ -141,8 +145,6 @@ module Paratrooper
         app_restart
       end
       teardown
-    rescue Error => e
-      abort(e.message)
     end
     alias_method :deploy, :default_deploy
 

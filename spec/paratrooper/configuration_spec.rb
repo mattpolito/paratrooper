@@ -29,49 +29,26 @@ describe Paratrooper::Configuration do
     end
   end
 
-  describe "tag_name" do
-    context "with passed value" do
-      it "returns passed value" do
-        configuration.tag_name = "TAG_NAME"
-        expect(configuration.tag_name).to eq("TAG_NAME")
+  describe "branch_name?" do
+    context "when branch_name is a valid string" do
+      it "returns true" do
+        configuration.branch_name = 'BRANCH_NAME'
+        expect(configuration.branch_name?).to eq(true)
       end
     end
 
-    context "with no value passed" do
-      it "returns nil" do
-        expect(configuration.tag_name).to be_nil
-      end
-    end
-  end
-
-  describe "tag=" do
-    it "holds value in @tag_name" do
-      configuration.tag = "TAG_NAME"
-
-      expect(configuration.tag_name).to eq("TAG_NAME")
-    end
-  end
-
-  describe "match_tag_name" do
-    context "with passed value" do
-      it "returns passed value" do
-        configuration.match_tag_name = "TAG_NAME"
-        expect(configuration.match_tag_name).to eq("TAG_NAME")
+    context "when branch_name is an invalid string" do
+      it "returns false" do
+        configuration.branch_name = "   "
+        expect(configuration.branch_name?).to eq(false)
       end
     end
 
-    context "with no value passed" do
-      it "returns 'master' as default" do
-        expect(configuration.match_tag_name).to eq("master")
+    context "when branch_name is nil" do
+      it "returns false" do
+        configuration.branch_name = nil
+        expect(configuration.branch_name?).to eq(false)
       end
-    end
-  end
-
-  describe "match_tag=" do
-    it "holds value in @match_tag_name" do
-      configuration.match_tag = "TAG_NAME"
-
-      expect(configuration.match_tag_name).to eq("TAG_NAME")
     end
   end
 
@@ -244,12 +221,13 @@ describe Paratrooper::Configuration do
         migration_check_class = class_double("PendingMigrationCheck")
         stub_const("Paratrooper::PendingMigrationCheck", migration_check_class)
         migration_check = double(:heroku)
+        source_control = double(:source_control, deployment_sha: "SHA")
 
-        configuration.match_tag_name = "MATCH"
         configuration.heroku = "HEROKU"
         configuration.system_caller = "SYSTEM"
+        configuration.source_control = source_control
 
-        expect(migration_check_class).to receive(:new).with("MATCH", "HEROKU", "SYSTEM")
+        expect(migration_check_class).to receive(:new).with("SHA", "HEROKU", "SYSTEM")
           .and_return(migration_check)
         expect(configuration.migration_check).to eq(migration_check)
       end
@@ -346,6 +324,28 @@ describe Paratrooper::Configuration do
         configuration.screen_notifier = "SCREEN_NOTIFIER"
 
         expect(configuration.notifiers).to eq(["SCREEN_NOTIFIER"])
+      end
+    end
+  end
+
+  describe "source_control" do
+    context "with passed value" do
+      it "returns passed value" do
+        source_control = double(:source_control)
+        configuration.source_control = source_control
+
+        expect(configuration.source_control).to eq(source_control)
+      end
+    end
+
+    context "with no value passed" do
+      it "returns default source_control" do
+        source_control = class_double("SourceControl")
+        stub_const("Paratrooper::SourceControl", source_control)
+        controller = double(:source_control)
+        expect(source_control).to receive(:new).with(configuration).and_return(controller)
+
+        expect(configuration.source_control).to eq(controller)
       end
     end
   end

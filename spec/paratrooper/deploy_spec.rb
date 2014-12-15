@@ -19,7 +19,6 @@ describe Paratrooper::Deploy do
   let(:options) { Hash.new }
   let(:heroku) do
     double(:heroku,
-      app_url: 'application_url',
       app_restart: true,
       app_maintenance_on: true,
       app_maintenance_off: true,
@@ -40,99 +39,22 @@ describe Paratrooper::Deploy do
     allow(screen_notifier).to receive(:notify)
   end
 
-  # describe "tag=" do
-  #   specify "tag is set and @tag_name holds value" do
-  #     deployer.tag = "tag_name"
-  #     expect(deployer.tag_name).to eq("tag_name")
-  #   end
-  # end
-
-  # describe "match_tag_to=" do
-  #   specify "match_tag is set and @match_tag_name holds value" do
-  #     deployer.match_tag = "staging"
-  #     expect(deployer.match_tag_name).to eq("staging")
-  #   end
-  # end
-
-  # describe "branch=" do
-  #   specify "branch is set and @branch_name holds value" do
-  #     deployer.branch = "branch_name"
-  #     expect(deployer.branch_name).to eq("branch_name")
-  #   end
-  # end
-
   describe "passing a block to initialize" do
     it "sets attributes on self" do
       deployer = described_class.new(app_name, default_options) do |p|
         p.deployment_host = "HOST"
-        p.match_tag       = "staging"
         p.protocol        = "MOM"
-        p.tag             = "production"
       end
-      expect(deployer.configuration.match_tag_name).to eq("staging")
-      expect(deployer.configuration.tag_name).to eq("production")
-      expect(deployer.configuration.deployment_host).to eq("HOST")
-      expect(deployer.configuration.protocol).to eq("MOM")
+      expect(deployer.config.deployment_host).to eq("HOST")
+      expect(deployer.config.protocol).to eq("MOM")
     end
 
     it "lazy loads dependent options" do
       deployer = described_class.new(app_name, api_key: 'API_KEY') do |p|
-        p.match_tag = 'integration'
+        p.force_push = false
       end
-      expect(deployer.configuration.api_key).to eq('API_KEY')
-      expect(deployer.configuration.match_tag_name).to eq('integration')
-    end
-  end
-
-  describe "options" do
-    context "accepts :tag" do
-      let(:options) { { tag: 'tag_name' } }
-
-      it "and responds to #tag_name" do
-        expect(deployer.configuration.tag_name).to eq('tag_name')
-      end
-    end
-
-    context "accepts :heroku" do
-      let(:options) { { heroku: heroku } }
-      let(:heroku) { double(:heroku) }
-
-      it "and responds to #heroku" do
-        expect(deployer.configuration.heroku).to eq(heroku)
-      end
-    end
-
-    context "accepts :notifiers" do
-      let(:options) { { notifiers: [notifiers] } }
-      let(:notifiers) { double(:notifier) }
-
-      it "and responds to #notifiers" do
-        expect(deployer.configuration.notifiers).to eq([notifiers])
-      end
-    end
-
-    describe "protocol" do
-      context "accepts :protocol" do
-        let(:options) { { protocol: 'https' } }
-
-        it "and responds to #protocol" do
-          expect(deployer.configuration.protocol).to eq('https')
-        end
-      end
-
-      context "no value passed" do
-        it "and responds to #protocol with default value" do
-          expect(deployer.configuration.protocol).to eq('http')
-        end
-      end
-    end
-
-    context "accepts :deployment_host" do
-      let(:options) { { deployment_host: 'host_name' } }
-
-      it "and responds to #notifiers" do
-        expect(deployer.configuration.deployment_host).to eq('host_name')
-      end
+      expect(deployer.config.api_key).to eq('API_KEY')
+      expect(deployer.config.force_push).to eq(false)
     end
   end
 
@@ -248,119 +170,36 @@ describe Paratrooper::Deploy do
     end
   end
 
-  describe "#update_repo_tag" do
-    context "when a tag_name is available" do
-      let(:options) { { tag: 'awesome' } }
-
-      before do
-        allow(system_caller).to receive(:execute)
-      end
-
-      it 'sends notification' do
-        expect(deployer).to receive(:notify).with(:update_repo_tag).once
-        deployer.update_repo_tag
-      end
-
-      context "when deploy_tag is available" do
-        before do
-          options.merge!(match_tag: 'deploy_this')
-        end
-
-        it 'creates a git tag at deploy_tag reference point' do
-          expect(system_caller).to receive(:execute).with('git tag awesome deploy_this -f')
-          deployer.update_repo_tag
-        end
-      end
-
-      context "when no deploy_tag is available" do
-        it 'creates a git tag at HEAD' do
-          expect(system_caller).to receive(:execute).with('git tag awesome master -f')
-          deployer.update_repo_tag
-        end
-      end
-
-      it 'pushes git tag' do
-        expected = 'git push -f origin awesome'
-        expect(system_caller).to receive(:execute).with(expected)
-        deployer.update_repo_tag
-      end
-    end
-
-    context "when a tag_name is unavailable" do
-      let(:options) { Hash.new }
-
-      it 'no repo tags are created' do
-        expect(system_caller).to_not receive(:execute)
-        deployer.update_repo_tag
-      end
-    end
-  end
-
   describe "#push_repo" do
+    let(:notifier) { double(:notifier) }
+    let(:source_control) { double(:source_control) }
+    let(:deployer) do
+      described_class.new('APP') do |d|
+        d.notifiers = notifier
+        d.source_control = source_control
+      end
+    end
+
     before do
-      allow(system_caller).to receive(:execute)
+      allow(source_control).to receive(:reference_point)
+      allow(source_control).to receive(:remote)
+      allow(source_control).to receive(:push_to_deploy)
+      allow(notifier).to receive(:notify)
     end
 
-    it 'sends notification' do
-      expect(deployer).to receive(:notify)
-        .with(:push_repo, reference_point: 'master', app_name: 'app', force_push: false).once
+    it "sends notification" do
+      allow(notifier).to receive(:notify) do |step, options|
+        expect(step).to eq(:push_repo)
+      end
       deployer.push_repo
+
+      expect(notifier).to have_received(:notify).once
     end
 
-    context "when branch_name is available" do
-      context "and branch_name is passed as a symbol" do
-        it 'pushes branch_name to heroku' do
-          deployer.configuration.branch_name = :SYMBOL_BRANCH_NAME
-          expected_call = 'git push git@heroku.com:app.git refs/heads/SYMBOL_BRANCH_NAME:refs/heads/master'
-          expect(system_caller).to receive(:execute).with(expected_call)
-          deployer.push_repo
-        end
-      end
+    it "pushes repo to remote" do
+      deployer.push_repo
 
-      it 'pushes branch_name to heroku' do
-        deployer.configuration.branch_name = "BRANCH_NAME"
-        expected_call = 'git push git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
-        expect(system_caller).to receive(:execute).with(expected_call)
-        deployer.push_repo
-      end
-
-      it 'supports pushing to HEAD (current branch)' do
-        deployer.configuration.branch_name = :head
-        expected_call = 'git push git@heroku.com:app.git HEAD:refs/heads/master'
-        expect(system_caller).to receive(:execute).with(expected_call)
-        deployer.push_repo
-      end
-    end
-
-    context "when tag_name with no branch_name is available" do
-      before do
-        deployer.configuration.tag_name = "TAG_NAME"
-      end
-
-      it 'pushes branch_name to heroku' do
-        expected_call = 'git push git@heroku.com:app.git refs/tags/TAG_NAME:refs/heads/master'
-        expect(system_caller).to receive(:execute).with(expected_call)
-        deployer.push_repo
-      end
-    end
-
-    context "when no branch_name or tag_name" do
-      it 'pushes master repo to heroku' do
-        expected_call = 'git push git@heroku.com:app.git master:refs/heads/master'
-        expect(system_caller).to receive(:execute).with(expected_call)
-        deployer.push_repo
-      end
-    end
-
-    context "when force flag is true" do
-      it 'force pushes to heroku' do
-        allow(screen_notifier).to receive(:notify)
-        deployer.configuration.branch_name = "BRANCH_NAME"
-        deployer.configuration.force_push = true
-        expected_call = 'git push -f git@heroku.com:app.git refs/heads/BRANCH_NAME:refs/heads/master'
-        expect(system_caller).to receive(:execute).with(expected_call)
-        deployer.push_repo
-      end
+      expect(source_control).to have_received(:push_to_deploy)
     end
   end
 
@@ -431,68 +270,41 @@ describe Paratrooper::Deploy do
     end
   end
 
-  describe "#warm_instance" do
-    before do
-      allow(system_caller).to receive(:execute)
-    end
-
-    it 'sends notification' do
-      expect(deployer).to receive(:notify).with(:warm_instance).once
-      deployer.warm_instance(0)
-    end
-
-    it 'pings application url' do
-      expected_url = 'http://application_url'
-      expect(http_client).to receive(:get).with(expected_url)
-      deployer.warm_instance(0)
-    end
-
-    context 'with optional protocol' do
-      let(:options) { { protocol: 'https' } }
-
-      it 'pings application url using the protocol' do
-        expected_url = 'https://application_url'
-        expect(http_client).to receive(:get).with(expected_url)
-        deployer.warm_instance(0)
+  describe "#add_callback" do
+    it "adds callback" do
+      callback = proc do |output|
+        system("touch spec/fixtures/test.txt")
       end
+
+      deployer = described_class.new(app_name, default_options) do |p|
+        p.add_callback(:before_setup, &callback)
+      end
+
+      expect(deployer.config.callbacks[:before_setup]).to eq([callback])
     end
 
-    describe "#add_callback" do
-      it "adds callback" do
+    context "when messaging is added to callback" do
+      it "is called" do
         callback = proc do |output|
-          system("touch spec/fixtures/test.txt")
+          output.display("Whoo Hoo!")
         end
+
+        allow(screen_notifier).to receive(:display).with("Whoo Hoo!")
 
         deployer = described_class.new(app_name, default_options) do |p|
           p.add_callback(:before_setup, &callback)
         end
+        deployer.setup
 
-        expect(deployer.configuration.callbacks[:before_setup]).to eq([callback])
-      end
-
-      context "when messaging is added to callback" do
-        it "is called" do
-          callback = proc do |output|
-            output.display("Whoo Hoo!")
-          end
-
-          allow(screen_notifier).to receive(:display).with("Whoo Hoo!")
-
-          deployer = described_class.new(app_name, default_options) do |p|
-            p.add_callback(:before_setup, &callback)
-          end
-          deployer.setup
-
-          expect(screen_notifier).to have_received(:display).with("Whoo Hoo!")
-        end
+        expect(screen_notifier).to have_received(:display).with("Whoo Hoo!")
       end
     end
+  end
 
-    describe "#add_remote_task" do
-      it "makes call to heroku to run task" do
-        expect(heroku).to receive(:run_task).with("rake some:task:to:run")
-        deployer.add_remote_task("rake some:task:to:run")
-      end
+  describe "#add_remote_task" do
+    it "makes call to heroku to run task" do
+      expect(heroku).to receive(:run_task).with("rake some:task:to:run")
+      deployer.add_remote_task("rake some:task:to:run")
     end
   end
 end

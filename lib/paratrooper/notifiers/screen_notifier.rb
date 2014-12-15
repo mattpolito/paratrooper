@@ -63,10 +63,6 @@ module Paratrooper
       def app_restart(options = {})
         display("Restarting application")
       end
-
-      def warm_instance(options = {})
-        display("Accessing #{options[:app_url]} to warm up your application")
-      end
     end
   end
 end

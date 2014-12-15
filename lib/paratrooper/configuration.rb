@@ -3,18 +3,19 @@ require 'paratrooper/http_client_wrapper'
 require 'paratrooper/system_caller'
 require 'paratrooper/callbacks'
 require 'paratrooper/pending_migration_check'
+require 'paratrooper/source_control'
+require 'paratrooper/notifiers/screen_notifier'
 
 module Paratrooper
   class Configuration
     include Callbacks
 
-    attr_accessor :tag_name, :branch_name, :app_name, :api_key
-    attr_writer :match_tag_name, :protocol, :heroku, :migration_check,
-      :system_caller, :deployment_host, :http_client, :screen_notifier
+    attr_accessor :branch_name, :app_name, :api_key
+    attr_writer :protocol, :heroku, :migration_check,
+      :system_caller, :deployment_host, :http_client, :screen_notifier,
+      :source_control
 
     alias :branch= :branch_name=
-    alias :match_tag= :match_tag_name=
-    alias :tag= :tag_name=
 
     def attributes=(attrs)
       attrs.each do |method, value|
@@ -22,12 +23,12 @@ module Paratrooper
       end
     end
 
-    def match_tag_name
-      @match_tag_name ||= 'master'
+    def branch_name?
+      !branch_name.to_s.strip.empty?
     end
 
     def migration_check
-      @migration_check ||= PendingMigrationCheck.new(match_tag_name, heroku, system_caller)
+      @migration_check ||= PendingMigrationCheck.new(source_control.deployment_sha, heroku, system_caller)
     end
 
     def heroku
@@ -45,10 +46,6 @@ module Paratrooper
     def notifiers
       @notifiers ||= [@screen_notifier]
     end
-
-    # def force
-    #   @force ||= false
-    # end
 
     def protocol
       @protocol ||= 'http'
@@ -88,6 +85,10 @@ module Paratrooper
 
     def system_caller
       @system_caller ||= SystemCaller.new
+    end
+
+    def source_control
+      @source_control ||= SourceControl.new(self)
     end
   end
 end

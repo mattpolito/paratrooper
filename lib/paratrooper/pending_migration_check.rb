@@ -2,11 +2,11 @@ require 'paratrooper/system_caller'
 
 module Paratrooper
   class PendingMigrationCheck
-    attr_accessor :diff, :heroku, :match_tag_name, :system_caller
+    attr_accessor :diff, :heroku, :deployment_sha, :system_caller
 
-    def initialize(match_tag_name, heroku_wrapper, system_caller)
+    def initialize(deployment_sha, heroku_wrapper, system_caller)
       self.heroku         = heroku_wrapper
-      self.match_tag_name = match_tag_name
+      self.deployment_sha = deployment_sha
       self.system_caller  = system_caller
     end
 
@@ -22,7 +22,7 @@ module Paratrooper
     private
 
     def check_for_pending_migrations
-      call = %Q[git diff --shortstat #{last_deployed_commit} #{match_tag_name} -- db/migrate]
+      call = %Q[git diff --shortstat #{last_deployed_commit} #{deployment_sha} -- db/migrate]
       self.diff = system_caller.execute(call)
       !diff.strip.empty?
     end

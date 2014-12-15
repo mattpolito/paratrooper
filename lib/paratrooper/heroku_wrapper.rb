@@ -26,10 +26,6 @@ module Paratrooper
       app_maintenance('1')
     end
 
-    def app_url
-      app_domain_name
-    end
-
     def run_migrations
       run_task('rake db:migrate')
     end
@@ -46,24 +42,8 @@ module Paratrooper
     end
 
     private
-    def app_domain_name
-      if custom_domain_response
-        custom_domain_response['domain']
-      else
-        default_domain_name
-      end
-    end
-
     def app_maintenance(flag)
       heroku_api.post_app_maintenance(app_name, flag)
-    end
-
-    def default_domain_name
-      heroku_api.get_app(app_name).body['domain_name']['domain']
-    end
-
-    def custom_domain_response
-      @custom_domain_response ||= heroku_api.get_domains(app_name).body.last
     end
   end
 end

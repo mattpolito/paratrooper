@@ -1,8 +1,9 @@
 require 'netrc'
+require 'paratrooper/error'
 
 module Paratrooper
   class LocalApiKeyExtractor
-    class NetrcFileDoesNotExist < StandardError; end
+    class NetrcFileDoesNotExist < Paratrooper::Error; end
 
     attr_reader :file_path, :netrc_klass
 

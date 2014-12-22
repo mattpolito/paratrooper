@@ -1,5 +1,6 @@
 require 'forwardable'
 require 'paratrooper/configuration'
+require 'paratrooper/error'
 
 module Paratrooper
 
@@ -145,6 +146,8 @@ module Paratrooper
         app_restart
       end
       teardown
+    rescue Paratrooper::Error => e
+      abort(e.message)
     end
     alias_method :deploy, :default_deploy
 

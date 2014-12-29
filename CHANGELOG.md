@@ -1,13 +1,20 @@
 # Changelog
 
+## 3.0.0.beta1
+
+- Moved all state into configuration object
+- Updated interface to start a deploy Ex: `Paratrooper.deploy('appname')`
+- If any exception is thrown, the deploy process is aborted
+- Stop deploy process if there is no access to Heroku
+
 ## 2.4.1
 
-- Fix Deploy#app_url for wildcard domains
+- Fix `Deploy#app_url` for wildcard domains
 
 ## 2.4.0
 
 - Maintenance mode only runs around migrations now
-- README updates around maintenance_mode=
+- README updates around `maintenance_mode=`
 
 ## 2.3.0
 

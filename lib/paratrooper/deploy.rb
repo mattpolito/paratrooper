@@ -201,7 +201,7 @@ module Paratrooper
     end
 
     def pending_migrations?
-      migration_check.migrations_waiting?
+      @pending_migrations ||= migration_check.migrations_waiting?
     end
 
     def restart_required?

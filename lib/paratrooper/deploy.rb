@@ -79,7 +79,7 @@ module Paratrooper
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
-      return unless config.maintenance && pending_migrations?
+      return unless maintenance_necessary?
       callback(:activate_maintenance_mode) do
         notify(:activate_maintenance_mode)
         heroku.app_maintenance_on
@@ -89,7 +89,7 @@ module Paratrooper
     # Public: Deactivates Heroku maintenance mode.
     #
     def deactivate_maintenance_mode
-      return unless pending_migrations?
+      return unless maintenance_necessary?
       callback(:deactivate_maintenance_mode) do
         notify(:deactivate_maintenance_mode)
         heroku.app_maintenance_off
@@ -164,6 +164,10 @@ module Paratrooper
       activate_maintenance_mode
       block.call if block_given?
       deactivate_maintenance_mode
+    end
+
+    def maintenance_necessary?
+      config.maintenance? && pending_migrations?
     end
 
     def callback(name, &block)

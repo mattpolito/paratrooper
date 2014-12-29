@@ -23,7 +23,7 @@ module Paratrooper
     end
 
     def push_to_deploy
-      system_call("git push #{force_flag}#{remote} #{reference_point}:refs/heads/master")
+      system_call("git push #{force_flag}#{remote} #{reference_point}:refs/heads/master", :exit_code)
     end
 
     def reference_point
@@ -42,8 +42,8 @@ module Paratrooper
     #
     # cmd - String version of system command
     #
-    def system_call(cmd)
-      system_caller.execute(cmd)
+    def system_call(cmd, exit_code = false)
+      system_caller.execute(cmd, exit_code)
     end
   end
 end

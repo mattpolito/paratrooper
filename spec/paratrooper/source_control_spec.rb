@@ -104,8 +104,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
 
         source_control.deployment_sha
-        expected_cmd = "git rev-parse refs/heads/BRANCH_NAME"
-        expect(system_caller).to have_received(:execute).with(expected_cmd)
+        expected_cmd = ["git rev-parse refs/heads/BRANCH_NAME", false]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -119,8 +119,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
 
         source_control.deployment_sha
-        expected_cmd = "git rev-parse HEAD"
-        expect(system_caller).to have_received(:execute).with(expected_cmd)
+        expected_cmd = ["git rev-parse HEAD", false]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
   end
@@ -141,8 +141,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_call = 'git push git@HOST:APP.git refs/heads/BRANCH_NAME:refs/heads/master'
-        expect(system_caller).to have_received(:execute).with(expected_call)
+        expected_cmd = ['git push git@HOST:APP.git refs/heads/BRANCH_NAME:refs/heads/master', :exit_code]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -155,8 +155,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_call = 'git push git@HOST:APP.git refs/heads/BRANCH_NAME:refs/heads/master'
-        expect(system_caller).to have_received(:execute).with(expected_call)
+        expected_cmd = ['git push git@HOST:APP.git refs/heads/BRANCH_NAME:refs/heads/master', :exit_code]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -169,8 +169,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_call = 'git push git@HOST:APP.git HEAD:refs/heads/master'
-        expect(system_caller).to have_received(:execute).with(expected_call)
+        expected_cmd = ['git push git@HOST:APP.git HEAD:refs/heads/master', :exit_code]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -183,8 +183,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_call = 'git push git@HOST:APP.git HEAD:refs/heads/master'
-        expect(system_caller).to have_received(:execute).with(expected_call)
+        expected_cmd = ['git push git@HOST:APP.git HEAD:refs/heads/master', :exit_code]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -197,8 +197,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_cmd = "git push -f git@HOST:APP.git HEAD:refs/heads/master"
-        expect(config.system_caller).to have_received(:execute).with(expected_cmd)
+        expected_cmd = ["git push -f git@HOST:APP.git HEAD:refs/heads/master", :exit_code]
+        expect(config.system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -211,8 +211,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_call = 'git push git@HOST:APP.git refs/heads/BRANCH_NAME:refs/heads/master'
-        expect(system_caller).to have_received(:execute).with(expected_call)
+        expected_cmd = ['git push git@HOST:APP.git refs/heads/BRANCH_NAME:refs/heads/master', :exit_code]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
 
@@ -225,8 +225,8 @@ describe Paratrooper::SourceControl do
         source_control = described_class.new(config)
         source_control.push_to_deploy
 
-        expected_call = 'git push git@HOST:APP.git HEAD:refs/heads/master'
-        expect(system_caller).to have_received(:execute).with(expected_call)
+        expected_cmd = ['git push git@HOST:APP.git HEAD:refs/heads/master', :exit_code]
+        expect(system_caller).to have_received(:execute).with(*expected_cmd)
       end
     end
   end

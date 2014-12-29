@@ -22,8 +22,8 @@ module Paratrooper
     private
 
     def check_for_pending_migrations
-      call = %Q[git diff --shortstat #{last_deployed_commit} #{deployment_sha} -- db/migrate]
-      self.diff = system_caller.execute(call)
+      cmd = %Q[git diff --shortstat #{last_deployed_commit} #{deployment_sha} -- db/migrate]
+      self.diff = system_caller.execute(cmd)
       !diff.strip.empty?
     end
   end

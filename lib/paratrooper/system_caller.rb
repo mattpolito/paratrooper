@@ -13,8 +13,8 @@ module Paratrooper
 
     private
 
-    def debug_message_for(call)
-      puts "DEBUG: #{call}" if debug
+    def debug_message_for(cmd)
+      puts "DEBUG: #{cmd}" if debug
     end
   end
 end

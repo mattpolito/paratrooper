@@ -25,5 +25,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'heroku-api', '~> 0.3'
   gem.add_dependency 'rendezvous', '~> 0.1'
   gem.add_dependency 'netrc', '~> 0.7'
-  gem.add_dependency 'excon'
+  gem.add_dependency 'excon', '>= 0.44.4'
 end

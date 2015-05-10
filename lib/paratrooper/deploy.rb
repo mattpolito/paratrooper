@@ -3,11 +3,9 @@ require 'paratrooper/configuration'
 require 'paratrooper/error'
 
 module Paratrooper
-
-  # Public: Entry point into the library.
-  #
   class Deploy
     extend Forwardable
+
     delegate [:system_caller, :migration_check, :notifiers,
       :deloyment_host, :heroku, :source_control, :screen_notifier
     ] => :config

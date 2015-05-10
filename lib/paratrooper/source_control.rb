@@ -71,8 +71,9 @@ module Paratrooper
       system_call("git push -f origin #{scm_tag_reference}")
     end
 
+    # Internal: Calls commands meant to go to system.
     #
-    # cmd - String version of system command
+    # cmd - String version of system command.
     #
     def system_call(cmd, exit_code = false)
       system_caller.execute(cmd, exit_code)

@@ -189,7 +189,7 @@ module Paratrooper
     def default_payload
       {
         app_name: config.app_name,
-        deployment_remote: source_control.remote,
+        deployment_remote: deployment_remote,
         force_push: config.force_push,
         reference_point: source_control.reference_point,
       }

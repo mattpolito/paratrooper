@@ -38,7 +38,39 @@ module Paratrooper
       "-f " if config.force_push
     end
 
-    # Internal: Calls commands meant to go to system
+    def tag_name
+      config.tag_name
+    end
+
+    def taggable?
+      !untaggable?
+    end
+
+    def untaggable?
+      tag_name.nil? || tag_name.empty?
+    end
+
+    def match_tag_name
+      config.match_tag_name
+    end
+
+    def scm_tag_reference
+      "refs/tags/#{tag_name}" if tag_name
+    end
+
+    def scm_match_reference
+      if match_tag_name
+        "refs/tags/#{match_tag_name}"
+      else
+        "HEAD"
+      end
+    end
+
+    def update_repo_tag
+      system_call("git tag #{tag_name} #{match_tag_name} -f")
+      system_call("git push -f origin #{scm_tag_reference}")
+    end
+
     #
     # cmd - String version of system command
     #

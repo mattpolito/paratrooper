@@ -76,6 +76,15 @@ module Paratrooper
       end
     end
 
+    def update_repo_tag
+      if source_control.taggable?
+        callback(:update_repo_tag) do
+          notify(:update_repo_tag)
+          source_control.update_repo_tag
+        end
+      end
+    end
+
     # Public: Activates Heroku maintenance mode.
     #
     def activate_maintenance_mode
@@ -140,6 +149,7 @@ module Paratrooper
     # Alias: #deploy
     def default_deploy
       setup
+      update_repo_tag
       push_repo
       maintenance_mode do
         run_migrations

@@ -10,12 +10,13 @@ module Paratrooper
   class Configuration
     include Callbacks
 
-    attr_accessor :branch_name, :app_name, :api_key
+    attr_accessor :branch_name, :tag_name, :match_tag_name, :app_name, :api_key
     attr_writer :protocol, :heroku, :migration_check,
       :system_caller, :deployment_host, :http_client, :screen_notifier,
       :source_control
 
     alias :branch= :branch_name=
+    alias :tag= :tag_name=
 
     def attributes=(attrs)
       attrs.each do |method, value|

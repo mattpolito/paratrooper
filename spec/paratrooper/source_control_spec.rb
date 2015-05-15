@@ -87,7 +87,7 @@ describe Paratrooper::SourceControl do
       system_caller = double(:system_caller)
       allow(system_caller).to receive(:execute).and_return("SHA\n")
       config = instance_double(Paratrooper::Configuration,
-        branch_name?: false, system_caller: system_caller
+        tag_name: "SHA", system_caller: system_caller
       )
       source_control = described_class.new(config)
       expect(source_control.deployment_sha).to eq("SHA")
@@ -99,7 +99,7 @@ describe Paratrooper::SourceControl do
         allow(system_caller).to receive(:execute).and_return("SHA\n")
         config = instance_double(Paratrooper::Configuration,
           branch_name?: true, branch_name: "BRANCH_NAME",
-          system_caller: system_caller
+          tag_name: nil, system_caller: system_caller
         )
         source_control = described_class.new(config)
 
@@ -114,7 +114,7 @@ describe Paratrooper::SourceControl do
         system_caller = double(:system_caller)
         allow(system_caller).to receive(:execute).and_return("SHA\n")
         config = instance_double(Paratrooper::Configuration,
-          branch_name?: false, system_caller: system_caller
+          branch_name?: false, tag_name: nil, system_caller: system_caller
         )
         source_control = described_class.new(config)
 
@@ -157,7 +157,8 @@ describe Paratrooper::SourceControl do
       it 'pushes branch_name' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
           deployment_host: "HOST", app_name: "APP", branch_name?: true,
-          branch_name: "BRANCH_NAME", system_caller: system_caller
+          branch_name: "BRANCH_NAME", tag_name: nil,
+          system_caller: system_caller
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy
@@ -171,7 +172,8 @@ describe Paratrooper::SourceControl do
       it 'pushes branch_name' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
           deployment_host: "HOST", app_name: "APP", branch_name?: true,
-          branch_name: :BRANCH_NAME, system_caller: system_caller
+          branch_name: :BRANCH_NAME, tag_name: nil,
+          system_caller: system_caller
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy
@@ -185,7 +187,8 @@ describe Paratrooper::SourceControl do
       it 'pushes HEAD' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
           deployment_host: "HOST", app_name: "APP", branch_name?: true,
-          branch_name: :head, system_caller: system_caller
+          branch_name: :head, tag_name: nil,
+          system_caller: system_caller
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy
@@ -199,7 +202,8 @@ describe Paratrooper::SourceControl do
       it 'pushes HEAD' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
           deployment_host: "HOST", app_name: "APP", branch_name?: true,
-          branch_name: "HEAD", system_caller: system_caller
+          branch_name: "HEAD", tag_name: nil,
+          system_caller: system_caller
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy
@@ -213,7 +217,8 @@ describe Paratrooper::SourceControl do
       it "issues command to forcefully push to remote" do
         config = instance_double(Paratrooper::Configuration,
           system_caller: system_caller, force_push: true,
-          deployment_host: 'HOST', app_name: 'APP', branch_name?: false
+          deployment_host: 'HOST', app_name: 'APP', branch_name?: false,
+          tag_name: nil
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy
@@ -227,7 +232,8 @@ describe Paratrooper::SourceControl do
       it "pushes branch_name" do
         config = instance_double(Paratrooper::Configuration, force_push: false,
           deployment_host: "HOST", app_name: "APP", branch_name?: true,
-          branch_name: "BRANCH_NAME", system_caller: system_caller
+          branch_name: "BRANCH_NAME", tag_name: nil,
+          system_caller: system_caller
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy
@@ -241,7 +247,7 @@ describe Paratrooper::SourceControl do
       it "pushes HEAD" do
         config = instance_double(Paratrooper::Configuration, force_push: false,
           deployment_host: "HOST", app_name: "APP", branch_name?: false,
-          system_caller: system_caller
+          tag_name: nil, system_caller: system_caller
         )
         source_control = described_class.new(config)
         source_control.push_to_deploy

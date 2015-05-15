@@ -27,7 +27,7 @@ module Paratrooper
     end
 
     def reference_point
-      branch_name || 'HEAD'
+      tag_name || branch_name || 'HEAD'
     end
 
     def deployment_sha

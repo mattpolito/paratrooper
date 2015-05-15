@@ -17,6 +17,7 @@ module Paratrooper
 
     alias :branch= :branch_name=
     alias :tag= :tag_name=
+    alias :match_tag= :match_tag_name=
 
     def attributes=(attrs)
       attrs.each do |method, value|

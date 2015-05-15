@@ -67,14 +67,6 @@ describe Paratrooper::Configuration do
     end
   end
 
-  describe "branch=" do
-    specify "branch is set and @branch_name holds value" do
-      configuration.branch = "branch_name"
-
-      expect(configuration.branch_name).to eq("branch_name")
-    end
-  end
-
   describe "protocol" do
     context "with passed value" do
       specify "passed value is returned" do
@@ -347,6 +339,28 @@ describe Paratrooper::Configuration do
 
         expect(configuration.source_control).to eq(controller)
       end
+    end
+  end
+
+  describe "#tag=" do
+    it "writes value to #tag_name" do
+      configuration.tag = "TAG_NAME"
+      expect(configuration.tag_name).to eq("TAG_NAME")
+    end
+  end
+
+  describe "#match_tag=" do
+    it "writes value to #match_tag_name" do
+      configuration.match_tag = "MATCH_TAG_NAME"
+      expect(configuration.match_tag_name).to eq("MATCH_TAG_NAME")
+    end
+  end
+
+  describe "#branch=" do
+    specify "writes value to #branch_name" do
+      configuration.branch = "BRANCH_NAME"
+
+      expect(configuration.branch_name).to eq("BRANCH_NAME")
     end
   end
 end

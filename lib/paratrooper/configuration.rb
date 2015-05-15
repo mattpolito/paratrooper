@@ -76,6 +76,7 @@ module Paratrooper
     def force_push=(val)
       @force_push= !!val
     end
+    alias :force= :force_push=
 
     def force_push
       @force_push ||= false

@@ -159,6 +159,13 @@ describe Paratrooper::Configuration do
     end
   end
 
+  describe "#force" do
+    it "writes value to #force_push" do
+      configuration.force = true
+      expect(configuration.force_push).to eq(true)
+    end
+  end
+
   describe "force_push?" do
     context "when #force_push is truthy" do
       it "returns true" do
@@ -357,9 +364,8 @@ describe Paratrooper::Configuration do
   end
 
   describe "#branch=" do
-    specify "writes value to #branch_name" do
+    it "writes value to #branch_name" do
       configuration.branch = "BRANCH_NAME"
-
       expect(configuration.branch_name).to eq("BRANCH_NAME")
     end
   end

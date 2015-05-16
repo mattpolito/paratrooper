@@ -44,7 +44,7 @@ module Paratrooper
       end
 
       def update_repo_tag(options = {})
-        display("Updating Repo Tag: #{options[:tag_name]}")
+        display("Updating Repo Tag: #{options[:reference_point]}")
       end
 
       def push_repo(options = {})

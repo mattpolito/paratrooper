@@ -63,6 +63,10 @@ module Paratrooper
       def app_restart(options = {})
         display("Restarting application")
       end
+
+      def deploy_finished(options = {})
+        display("Deploy finished")
+      end
     end
   end
 end

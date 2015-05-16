@@ -72,6 +72,7 @@ module Paratrooper
       callback(:teardown) do
         notify(:teardown)
       end
+      notify(:deploy_finished)
     end
 
     def update_repo_tag

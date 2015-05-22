@@ -7,7 +7,7 @@ module Paratrooper
     extend Forwardable
 
     delegate [:system_caller, :migration_check, :notifiers,
-      :deloyment_host, :heroku, :source_control, :screen_notifier
+      :deloyment_host, :heroku, :source_control, :screen_notifier, :slug
     ] => :config
 
     attr_writer :config
@@ -115,6 +115,13 @@ module Paratrooper
       end
     end
 
+    def push_slug
+      callback(:push_slug) do
+        notify(:push_slug)
+        slug.deploy_slug
+      end
+    end
+
     # Public: Runs rails database migrations on your application.
     #
     def run_migrations
@@ -148,7 +155,7 @@ module Paratrooper
     def default_deploy
       setup
       update_repo_tag
-      push_repo
+      slug_deploy?() ? push_slug() : push_repo()
       maintenance_mode do
         run_migrations
         app_restart
@@ -165,6 +172,14 @@ module Paratrooper
     #
     def add_remote_task(task_name)
       heroku.run_task(task_name)
+    end
+
+    # Public: Return the slug id of the last release of app_name
+    #
+    # app_name - String name of the app to lookup slug id
+    #
+    def deployed_slug(app_name)
+      slug.deployed_slug(app_name)
     end
 
     private
@@ -190,6 +205,7 @@ module Paratrooper
         deployment_remote: deployment_remote,
         force_push: config.force_push,
         reference_point: source_control.reference_point,
+        slug_id: slug.slug_id_to_deploy
       }
     end
 
@@ -214,6 +230,14 @@ module Paratrooper
 
     def restart_required?
       pending_migrations?
+    end
+
+    def slug_deploy?
+      if config.slug_id || config.slug_app_name
+        true
+      else
+        false
+      end
     end
   end
 end

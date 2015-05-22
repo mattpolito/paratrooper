@@ -56,6 +56,11 @@ module Paratrooper
         end
       end
 
+      def push_slug(options = {})
+        desc = "slug #{options[:slug_id]} to #{options[:app_name]} on Heroku"
+        display("Pushing #{desc}")
+      end
+
       def run_migrations(options = {})
         display("Running database migrations")
       end

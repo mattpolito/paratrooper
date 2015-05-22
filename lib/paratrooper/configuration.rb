@@ -4,16 +4,17 @@ require 'paratrooper/system_caller'
 require 'paratrooper/callbacks'
 require 'paratrooper/pending_migration_check'
 require 'paratrooper/source_control'
+require 'paratrooper/slug'
 require 'paratrooper/notifiers/screen_notifier'
 
 module Paratrooper
   class Configuration
     include Callbacks
 
-    attr_accessor :branch_name, :tag_name, :match_tag_name, :app_name, :api_key
+    attr_accessor :branch_name, :tag_name, :match_tag_name, :app_name, :api_key, :slug_app_name, :slug_id
     attr_writer :protocol, :heroku, :migration_check,
       :system_caller, :deployment_host, :http_client, :screen_notifier,
-      :source_control
+      :source_control, :slug
 
     alias :branch= :branch_name=
     alias :tag= :tag_name=
@@ -92,6 +93,10 @@ module Paratrooper
 
     def source_control
       @source_control ||= SourceControl.new(self)
+    end
+
+    def slug
+      @slug ||= Slug.new(self)
     end
   end
 end

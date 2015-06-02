@@ -116,6 +116,8 @@ module Paratrooper
       end
     end
 
+    # Public: Pushes (deploys) the slug to Heroku
+    #
     def push_slug
       callback(:push_slug) do
         notify(:push_slug)

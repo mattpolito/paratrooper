@@ -170,6 +170,26 @@ describe Paratrooper::Deploy do
     end
   end
 
+  describe "#deployed_slug" do
+    let(:slug) { double(:slug) }
+    let(:deployer) do
+      described_class.new('APP') do |d|
+        d.slug = slug
+      end
+    end
+
+    before do
+      allow(slug).to receive(:deployed_slug)
+    end
+
+    it "reports deployed slug" do
+      app_name = 'some-app'
+      deployer.deployed_slug(app_name)
+
+      expect(slug).to have_received(:deployed_slug).with(app_name)
+    end
+  end
+
   describe "#push_repo" do
     let(:notifier) { double(:notifier) }
     let(:source_control) { double(:source_control) }
@@ -201,6 +221,43 @@ describe Paratrooper::Deploy do
 
       expect(source_control).to have_received(:push_to_deploy)
     end
+  end
+
+  describe "#push_slug" do
+    let(:notifier) { double(:notifier) }
+    let(:source_control) { double(:source_control) }
+    let(:slug) { double(:slug) }
+    let(:deployer) do
+      described_class.new('APP') do |d|
+        d.notifiers = notifier
+        d.source_control = source_control
+        d.slug = slug
+      end
+    end
+
+    before do
+      allow(source_control).to receive(:reference_point)
+      allow(source_control).to receive(:remote)
+      allow(notifier).to receive(:notify)
+      allow(slug).to receive(:slug_id_to_deploy)
+      allow(slug).to receive(:deploy_slug)
+    end
+
+    it "sends notification" do
+      allow(notifier).to receive(:notify) do |step, options|
+        expect(step).to eq(:push_slug)
+      end
+      deployer.push_slug
+
+      expect(notifier).to have_received(:notify).once
+    end
+
+    it "pushes slug to heroku" do
+      deployer.push_slug
+
+      expect(slug).to have_received(:deploy_slug)
+    end
+
   end
 
   describe "#run_migrations" do

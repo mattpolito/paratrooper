@@ -18,20 +18,24 @@ module Paratrooper
       @app_name      = app_name
       @key_extractor = options[:key_extractor] || LocalApiKeyExtractor
       @api_key       = options[:api_key] || key_extractor.get_credentials
-      @heroku_api    = options[:heroku_api] || Heroku::API.new(api_key: api_key)
+      @heroku_api    = options[:heroku_api] || PlatformAPI.connect_oauth(api_key)
       @rendezvous    = options[:rendezvous] || Rendezvous
     end
 
     def app_restart
-      client(:post_ps_restart, app_name)
+      client(:dyno, :restart_all, app_name)
     end
 
     def app_maintenance_off
-      app_maintenance('0')
+      client(:app, :update, app_name, 'maintenance' => 'false')
     end
 
     def app_maintenance_on
-      app_maintenance('1')
+      client(:app, :update, app_name, 'maintenance' => 'true')
+    end
+
+    def releases
+      client(:release, :list, app_name)
     end
 
     def run_migrations
@@ -44,19 +48,26 @@ module Paratrooper
     end
 
     def last_deploy_commit
-      data = client(:get_releases, app_name).body
-      return nil if data.empty?
-      data.last['commit']
+      last_release = releases.body.first
+      return nil if last_release.nil?
+
+      slug_data = client(:slug, :info, app_name, get_slug_id(last_release)).body
+      slug_data.last['commit']
     end
 
     private
+
+    def get_slug_id(release)
+      release["slug"]["id"].to_i
+    end
+
     def app_maintenance(flag)
       client(:post_app_maintenance, app_name, flag)
     end
 
-    def client(method, *args)
-      heroku_api.public_send(method, *args)
-    rescue Heroku::API::Errors::Forbidden => e
+    def client(delegatee, method, *args)
+      heroku_api.public_send(delegatee).public_send(method, *args)
+    rescue PlatformAPI::Excon::Errors::Forbidden => e
       raise ErrorNoAccess.new(app_name)
     end
   end

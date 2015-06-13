@@ -2,10 +2,10 @@ require 'paratrooper/system_caller'
 
 module Paratrooper
   class PendingMigrationCheck
-    attr_accessor :diff, :heroku, :deployment_sha, :system_caller
+    attr_accessor :diff, :last_deployed_commit, :deployment_sha, :system_caller
 
-    def initialize(deployment_sha, heroku_wrapper, system_caller)
-      self.heroku         = heroku_wrapper
+    def initialize(last_deployed_commit, deployment_sha, system_caller)
+      self.last_deployed_commit = last_deployed_commit
       self.deployment_sha = deployment_sha
       self.system_caller  = system_caller
     end
@@ -13,10 +13,6 @@ module Paratrooper
     def migrations_waiting?
       defined?(@migrations_waiting) or @migrations_waiting = check_for_pending_migrations
       @migrations_waiting
-    end
-
-    def last_deployed_commit
-      @last_deploy_commit ||= heroku.last_deploy_commit
     end
 
     private

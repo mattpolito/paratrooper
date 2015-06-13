@@ -30,7 +30,7 @@ module Paratrooper
     end
 
     def migration_check
-      @migration_check ||= PendingMigrationCheck.new(source_control.deployment_sha, heroku, system_caller)
+      @migration_check ||= PendingMigrationCheck.new(heroku.last_deployed_commit, source_control.deployment_sha, system_caller)
     end
 
     def heroku

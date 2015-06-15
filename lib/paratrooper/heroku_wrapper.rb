@@ -42,8 +42,9 @@ module Paratrooper
       run_task('rake db:migrate')
     end
 
-    def run_task(task_name)
-      data = client(:post_ps, app_name, task_name, attach: 'true').body
+    def run_task(task)
+      payload = { 'command' => task, 'attach' => 'true' }
+      data    = client(:dyno, :create, app_name, payload).body
       rendezvous.start(url: data['rendezvous_url'])
     end
 

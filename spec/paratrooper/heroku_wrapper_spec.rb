@@ -65,14 +65,14 @@ describe Paratrooper::HerokuWrapper do
   end
 
   describe '#run_migrations' do
-    xit 'calls into the heroku api' do
-      expect(heroku_api).to receive(:post_ps).with(app_name, 'rake db:migrate', attach: 'true').and_return(double(body: ''))
+    it 'calls into the heroku api' do
+      expect(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => 'rake db:migrate', 'attach' => 'true' }).and_return(double(body: ''))
       wrapper.run_migrations
     end
 
-    xit 'uses waits for db migrations to run using rendezvous' do
+    it 'uses waits for db migrations to run using rendezvous' do
       data = { 'rendezvous_url' => 'the_url' }
-      allow(heroku_api).to receive_message_chain(:post_ps, :body).and_return(data)
+      allow(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => 'rake db:migrate', 'attach' => 'true' }).and_return(double(body: data))
       expect(rendezvous).to receive(:start).with(:url => data['rendezvous_url'])
       wrapper.run_migrations
     end
@@ -117,9 +117,9 @@ describe Paratrooper::HerokuWrapper do
   end
 
   describe "#run_task" do
-    xit 'calls into the heroku api' do
+    it 'calls into the heroku api' do
       task = 'rake some:task:to:run'
-      expect(heroku_api).to receive(:post_ps).with(app_name, task, attach: 'true').and_return(double(body: ''))
+      expect(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => task, 'attach' => 'true' }).and_return(double(body: ''))
       wrapper.run_task(task)
     end
   end

@@ -1,4 +1,4 @@
-require 'heroku-api'
+require 'platform-api'
 require 'rendezvous'
 require 'paratrooper/local_api_key_extractor'
 require 'paratrooper/error'

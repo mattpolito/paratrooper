@@ -49,17 +49,15 @@ module Paratrooper
     end
 
     def last_deploy_commit
-      last_release = releases.first
-      return nil if last_release.nil?
-
-      slug_data = client(:slug, :info, app_name, get_slug_id(last_release))
+      return nil if releases.empty?
+      slug_data = client(:slug, :info, app_name, get_slug_id(releases.first))
       slug_data.last['commit']
     end
 
     private
 
-    def get_slug_id(release)
-      release["slug"]["id"].to_i
+    def get_slug_id(last_release)
+      last_release["slug"]["id"].to_i
     end
 
     def app_maintenance(flag)

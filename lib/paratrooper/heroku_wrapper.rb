@@ -70,7 +70,7 @@ module Paratrooper
 
     def client(delegatee, method, *args)
       heroku_api.public_send(delegatee).public_send(method, *args)
-    rescue PlatformAPI::Excon::Errors::Forbidden => e
+    rescue Excon::Errors::Forbidden => e
       raise ErrorNoAccess.new(app_name)
     end
   end

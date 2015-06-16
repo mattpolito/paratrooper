@@ -81,7 +81,7 @@ describe Paratrooper::HerokuWrapper do
   describe "#last_deploy_commit" do
     context "when deploy data is returned" do
       let(:slug_data) do
-        [{ 'commit' => 'SHA' }]
+        { 'commit' => 'SHA' }
       end
 
       let(:release_data) do

@@ -51,7 +51,7 @@ module Paratrooper
     def last_deploy_commit
       return nil if last_release_with_slug.nil?
       slug_data = client(:slug, :info, app_name, get_slug_id(last_release_with_slug))
-      slug_data.last['commit']
+      slug_data['commit']
     end
 
     def last_release_with_slug

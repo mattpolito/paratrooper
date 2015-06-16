@@ -61,7 +61,7 @@ module Paratrooper
     private
 
     def get_slug_id(release)
-      release["slug"]["id"].to_i
+      release["slug"]["id"]
     end
 
     def app_maintenance(flag)

@@ -89,7 +89,7 @@ describe Paratrooper::HerokuWrapper do
       end
 
       it "returns string of last deployed commit" do
-        slug_info = release_data.first["slug"]["id"].to_i
+        slug_info = release_data.first["slug"]["id"]
 
         allow(heroku_api).to receive_message_chain(:release, :list).and_return(release_data)
         expect(heroku_api).to receive_message_chain(:slug, :info).with(app_name, slug_info)

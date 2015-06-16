@@ -44,15 +44,15 @@ module Paratrooper
 
     def run_task(task)
       payload = { 'command' => task, 'attach' => 'true' }
-      data    = client(:dyno, :create, app_name, payload).body
-      rendezvous.start(url: data['rendezvous_url'])
+      data    = client(:dyno, :create, app_name, payload)
+      rendezvous.start(url: data['attach_url'])
     end
 
     def last_deploy_commit
-      last_release = releases.body.first
+      last_release = releases.first
       return nil if last_release.nil?
 
-      slug_data = client(:slug, :info, app_name, get_slug_id(last_release)).body
+      slug_data = client(:slug, :info, app_name, get_slug_id(last_release))
       slug_data.last['commit']
     end
 

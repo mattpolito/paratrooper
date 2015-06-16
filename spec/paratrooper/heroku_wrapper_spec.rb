@@ -66,41 +66,41 @@ describe Paratrooper::HerokuWrapper do
 
   describe '#run_migrations' do
     it 'calls into the heroku api' do
-      expect(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => 'rake db:migrate', 'attach' => 'true' }).and_return(double(body: ''))
+      expect(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => 'rake db:migrate', 'attach' => 'true' }).and_return(Hash.new)
       wrapper.run_migrations
     end
 
     it 'uses waits for db migrations to run using rendezvous' do
-      data = { 'rendezvous_url' => 'the_url' }
-      allow(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => 'rake db:migrate', 'attach' => 'true' }).and_return(double(body: data))
-      expect(rendezvous).to receive(:start).with(:url => data['rendezvous_url'])
+      data = { 'attach_url' => 'the_url' }
+      allow(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => 'rake db:migrate', 'attach' => 'true' }).and_return(data)
+      expect(rendezvous).to receive(:start).with(:url => data['attach_url'])
       wrapper.run_migrations
     end
   end
 
   describe "#last_deploy_commit" do
     context "when deploy data is returned" do
-      let(:response) do
-        double(:response, body: [{ 'commit' => 'SHA' }])
+      let(:slug_data) do
+        [{ 'commit' => 'SHA' }]
       end
 
-      let(:data) do
+      let(:release_data) do
         [{ 'slug' => { 'id' => '1' } }]
       end
 
       it "returns string of last deployed commit" do
-        slug_info = data.first["slug"]["id"].to_i
+        slug_info = release_data.first["slug"]["id"].to_i
 
-        allow(heroku_api).to receive_message_chain(:release, :list, :body).and_return(data)
+        allow(heroku_api).to receive_message_chain(:release, :list).and_return(release_data)
         expect(heroku_api).to receive_message_chain(:slug, :info).with(app_name, slug_info)
-          .and_return(response)
+          .and_return(slug_data)
         expect(wrapper.last_deploy_commit).to eq('SHA')
       end
     end
 
     context "when no deploys have happened yet" do
       let(:response) do
-        double(:response, body: [])
+        Array.new
       end
 
       let(:data) do
@@ -119,7 +119,7 @@ describe Paratrooper::HerokuWrapper do
   describe "#run_task" do
     it 'calls into the heroku api' do
       task = 'rake some:task:to:run'
-      expect(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => task, 'attach' => 'true' }).and_return(double(body: ''))
+      expect(heroku_api).to receive_message_chain(:dyno, :create).with(app_name, {'command' => task, 'attach' => 'true' }).and_return(Hash.new)
       wrapper.run_task(task)
     end
   end

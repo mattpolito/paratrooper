@@ -64,10 +64,6 @@ module Paratrooper
       release["slug"]["id"]
     end
 
-    def app_maintenance(flag)
-      client(:post_app_maintenance, app_name, flag)
-    end
-
     def client(delegatee, method, *args)
       heroku_api.public_send(delegatee).public_send(method, *args)
     rescue Excon::Errors::Forbidden => e

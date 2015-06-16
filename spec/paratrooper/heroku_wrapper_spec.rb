@@ -116,6 +116,33 @@ describe Paratrooper::HerokuWrapper do
     end
   end
 
+  describe '#last_release_with_slug' do
+    let(:releases) do
+      [
+        { 'slug' => { 'id' => '1' }, 'updated_at' => '1990' },
+        { 'slug' => { 'id' => '2' }, 'updated_at' => '2015' },
+        { 'slug' => nil }
+      ]
+    end
+    it 'returns the most current release that has a slug attribute' do
+      allow(heroku_api).to receive_message_chain(:release, :list).and_return(releases)
+      expect(wrapper.last_release_with_slug['updated_at']).to eq '2015'
+
+    end
+
+    it 'returns nil if none of the releases have a slug attribute' do
+      data = [{ 'slug' => nil }]
+      allow(heroku_api).to receive_message_chain(:release, :list).and_return(data)
+      expect(wrapper.last_release_with_slug).to be_nil
+    end
+
+    it 'returns nil if the releases array is empty' do
+      data = []
+      allow(heroku_api).to receive_message_chain(:release, :list).and_return(data)
+      expect(wrapper.last_release_with_slug).to be_nil
+    end
+  end
+
   describe "#run_task" do
     it 'calls into the heroku api' do
       task = 'rake some:task:to:run'

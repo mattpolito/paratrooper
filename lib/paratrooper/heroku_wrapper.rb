@@ -35,7 +35,7 @@ module Paratrooper
     end
 
     def releases
-      client(:release, :list, app_name)
+      @releases ||= client(:release, :list, app_name)
     end
 
     def run_migrations
@@ -49,15 +49,19 @@ module Paratrooper
     end
 
     def last_deploy_commit
-      return nil if releases.empty?
-      slug_data = client(:slug, :info, app_name, get_slug_id(releases.first))
+      return nil if last_release_with_slug.nil?
+      slug_data = client(:slug, :info, app_name, get_slug_id(last_release_with_slug))
       slug_data.last['commit']
+    end
+
+    def last_release_with_slug
+      releases.reverse.detect { |release| not release['slug'].nil? }
     end
 
     private
 
-    def get_slug_id(last_release)
-      last_release["slug"]["id"].to_i
+    def get_slug_id(release)
+      release["slug"]["id"].to_i
     end
 
     def app_maintenance(flag)

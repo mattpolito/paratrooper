@@ -43,7 +43,7 @@ module Paratrooper
       rendezvous.start(url: data['rendezvous_url'])
     end
 
-    def last_deploy_commit
+    def last_deployed_commit
       data = client(:get_releases, app_name).body
       return nil if data.empty?
       data.last['commit']

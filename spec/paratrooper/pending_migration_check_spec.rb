@@ -3,23 +3,14 @@ require 'paratrooper/pending_migration_check'
 
 describe Paratrooper::PendingMigrationCheck do
   let(:migration_check) do
-    described_class.new(match_tag_name, heroku_wrapper, system_caller)
+    described_class.new(last_deployed_commit, match_tag_name, system_caller)
   end
   let(:system_caller) { double(:system_caller) }
-  let(:heroku_wrapper) do
-    double(:heroku_wrapper, last_deploy_commit: last_deployed_commit)
-  end
   let(:last_deployed_commit) { nil }
 
   describe "#migrations_waiting?" do
     let(:match_tag_name) { "MATCH" }
     let(:last_deployed_commit) { "LAST_DEPLOYED_COMMIT" }
-
-    it "calls out to heroku for latest deploy's commit" do
-      allow(system_caller).to receive(:execute).and_return("")
-      expect(heroku_wrapper).to receive(:last_deploy_commit)
-      migration_check.migrations_waiting?
-    end
 
     it "memoizes the git diff" do
       expect(system_caller).to receive(:execute).exactly(1).times.and_return("DIFF")

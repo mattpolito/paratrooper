@@ -62,7 +62,6 @@ module Paratrooper
     def setup
       callback(:setup) do
         notify(:setup)
-        migration_check.last_deployed_commit
       end
     end
 

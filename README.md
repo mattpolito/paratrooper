@@ -30,6 +30,9 @@ gem install paratrooper
 
 ## Usage
 
+### Git-based deploys
+The default deployment method is by pushing to the heroku application's git repo.
+
 Instantiate Paratrooper with the name of your heroku application.
 
 ```ruby
@@ -42,6 +45,46 @@ You can also provide a tag:
 Paratrooper.deploy('amazing-app') do |deploy|
   deploy.tag = 'staging'
 end
+```
+
+### Slug-based deploys
+Heroku also supports pushing slugs.  For example if you have a pipeline of applications such as ci -> staging -> production you want to make sure that the same slug is pushed through the pipeline.
+
+Deploy via git-based deploy to your 'ci' app to compile the slug.
+
+```ruby
+Paratrooper.deploy('amazing-app-ci')
+```
+
+Retrieve the slug-id
+
+```ruby
+Paratrooper.deployed_slug('amazing-app-ci')
+=> "7dedd312-d9ee-62da-74a4-111111111111"
+```
+
+Deploy the slug to the next app in the pipeline
+
+```ruby
+Paratrooper.deploy('amazing-app-staging', { slug_id: "7dedd312-d9ee-62da-74a4-111111111111" })
+```
+
+Slug based deploys will not migrate the database unless you force it by passing a migration check object
+
+```ruby
+class RunMigration
+  # @param run_migration [Boolean] true, runs migrations
+  def initialize(run_migration)
+    @run_migration = run_migration
+  end
+
+  def migrations_waiting?
+    @run_migration
+  end
+end
+
+Paratrooper.deploy('amazing-app-staging', { migration_check: RunMigration.new(true), slug_id: "7dedd312-d9ee-62da-74a4-111111111111" })
+
 ```
 
 ## Authentication

@@ -39,8 +39,8 @@ Paratrooper.deploy('amazing-app')
 You can also provide a tag:
 
 ```ruby
-Paratrooper.deploy('amazing-app') do |deploy|
-  deploy.tag = 'staging'
+Paratrooper.deploy('amazing-app') do |config|
+  config.tag = 'staging'
 end
 ```
 
@@ -51,8 +51,8 @@ You can authenticate your Heroku account in a few ways:
 * Provide an API Key
 
 ```ruby
-Paratrooper.deploy('app') do |deploy|
-  deploy.api_key = 'API_KEY'
+Paratrooper.deploy('app') do |config|
+  config.api_key = 'API_KEY'
 end
 ```
 
@@ -76,16 +76,16 @@ This method works via a local Netrc file handled via the [Heroku Toolbelt][] and
 If you use multiple SSH keys for managing multiple accounts, for example in your `.ssh/config`, you can set the `deployment_host` option:
 
 ```ruby
-Paratrooper.deploy('amazing-app') do |deploy|
-  deploy.deployment_host = 'HOST'
+Paratrooper.deploy('amazing-app') do |config|
+  config.deployment_host = 'HOST'
 end
 ```
 
 This also works if you're using the [heroku-accounts](https://github.com/ddollar/heroku-accounts) plugin:
 
 ```ruby
-Paratrooper.deploy('app') do |deploy|
-  deploy.deployment_host: 'heroku.ACCOUNT_NAME'
+Paratrooper.deploy('app') do |config|
+  config.deployment_host: 'heroku.ACCOUNT_NAME'
 end
 ```
 
@@ -149,13 +149,13 @@ to disable your application monitoring.
 namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
-    Paratrooper.deploy("amazing-production-app") do |deploy|
-      deploy.add_callback(:before_setup) do |output|
+    Paratrooper.deploy("amazing-production-app") do |config|
+      config.add_callback(:before_setup) do |output|
         output.display("Totally going to turn off newrelic")
         system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/disable -X POST -H "X-Api-Key: API_KEY"]
       end
 
-      deploy.add_callback(:after_teardown) do |output|
+      config.add_callback(:after_teardown) do |output|
         system %Q[curl https://rpm.newrelic.com/accounts/ACCOUNT_ID/applications/APPLICATION_ID/ping_targets/enable -X POST -H "X-Api-Key: API_KEY"]
         output.display("Aaaannnd we're back")
       end
@@ -172,11 +172,11 @@ Or maybe you just want to run a rake task on your application. Since this task m
 namespace :deploy do
   desc 'Deploy app in production environment'
   task :production do
-    Paratrooper.deploy("amazing-production-app") do |deploy|
-      deploy.maintenance = true
-      deploy.add_callback(:after_teardown) do |output|
+    Paratrooper.deploy("amazing-production-app") do |config|
+      config.maintenance = true
+      config.add_callback(:after_teardown) do |output|
         output.display("Running some task that needs to run")
-        deploy.add_remote_task("rake some:task:to:run")
+        config.add_remote_task("rake some:task:to:run")
       end
     end
   end

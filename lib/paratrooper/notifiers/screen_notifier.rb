@@ -59,6 +59,10 @@ module Paratrooper
       def run_migrations(options = {})
         display("Running database migrations")
       end
+      
+      def precompile_assets(options = {})
+        display("Precompiling assets")
+      end    
 
       def app_restart(options = {})
         display("Restarting application")

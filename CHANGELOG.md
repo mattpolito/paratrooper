@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.2
+
+- Fixed reverse call on enumerator on `Paratrooper::HerokuWrapper#last_release_with_slug`
+
 ## 3.0.1
 
 - Migrated to platform-api gem from heroku

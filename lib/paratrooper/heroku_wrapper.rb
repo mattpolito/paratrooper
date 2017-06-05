@@ -55,7 +55,8 @@ module Paratrooper
     end
 
     def last_release_with_slug
-      releases.reverse.detect { |release| not release['slug'].nil? }
+      # releases is an enumerator
+      releases.to_a.reverse.detect { |release| not release['slug'].nil? }
     end
 
     private

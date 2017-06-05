@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'pry'
-  gem.add_dependency 'platform-api', '~> 0.2'
+  gem.add_dependency 'platform-api', '~> 2.0'
   gem.add_dependency 'rendezvous', '~> 0.1'
   gem.add_dependency 'netrc', '~> 0.7'
   gem.add_dependency 'excon', '>= 0.44.4'

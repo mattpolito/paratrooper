@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+- Migrated to platform-api gem from heroku
+
 ## 3.0.0.beta1
 
 - Moved all state into configuration object

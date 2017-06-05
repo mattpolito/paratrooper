@@ -1,3 +1,3 @@
 module Paratrooper
-  VERSION = "3.0.0.beta3".freeze
+  VERSION = "3.0.1".freeze
 end

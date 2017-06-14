@@ -219,14 +219,15 @@ describe Paratrooper::Configuration do
       it "returns the default pending migration check object" do
         migration_check_class = class_double("PendingMigrationCheck")
         stub_const("Paratrooper::PendingMigrationCheck", migration_check_class)
-        migration_check = double(:heroku)
+        heroku = double(:heroku, last_deployed_commit: "LAST_DEPLOYED_COMMIT")
+        migration_check = double(:migration_check)
         source_control = double(:source_control, deployment_sha: "SHA")
 
-        configuration.heroku = "HEROKU"
+        configuration.heroku = heroku
         configuration.system_caller = "SYSTEM"
         configuration.source_control = source_control
 
-        expect(migration_check_class).to receive(:new).with("SHA", "HEROKU", "SYSTEM")
+        expect(migration_check_class).to receive(:new).with("LAST_DEPLOYED_COMMIT", "SHA", "SYSTEM")
           .and_return(migration_check)
         expect(configuration.migration_check).to eq(migration_check)
       end

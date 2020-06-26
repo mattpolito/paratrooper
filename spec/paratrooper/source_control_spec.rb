@@ -6,11 +6,24 @@ describe Paratrooper::SourceControl do
   describe "remote" do
     it "returns string of git representing remote repo" do
       config = instance_double(Paratrooper::Configuration,
-        deployment_host: 'HOST', app_name: 'APP'
+        deployment_host: 'HOST', app_name: 'APP', remote_name: 'APP'
       )
+
+      # expect(config).to receive(:remote_name).and_return('APP')
+
       source_control = described_class.new(config)
 
       expect(source_control.remote).to eq("git@HOST:APP.git")
+    end
+
+    it "returns string of git representing remote repo using the remote name" do
+      config = instance_double(Paratrooper::Configuration,
+        deployment_host: 'HOST', remote_name: 'REMOTE_NAME'
+      )
+
+      source_control = described_class.new(config)
+
+      expect(source_control.remote).to eq("git@HOST:REMOTE_NAME.git")
     end
   end
 
@@ -156,7 +169,7 @@ describe Paratrooper::SourceControl do
     context "when branch_name is a string" do
       it 'pushes branch_name' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
-          deployment_host: "HOST", app_name: "APP", branch_name?: true,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: true,
           branch_name: "BRANCH_NAME", tag_name: nil,
           system_caller: system_caller
         )
@@ -171,7 +184,7 @@ describe Paratrooper::SourceControl do
     context "when branch_name is a symbol" do
       it 'pushes branch_name' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
-          deployment_host: "HOST", app_name: "APP", branch_name?: true,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: true,
           branch_name: :BRANCH_NAME, tag_name: nil,
           system_caller: system_caller
         )
@@ -186,7 +199,7 @@ describe Paratrooper::SourceControl do
     context "when branch_name is :head" do
       it 'pushes HEAD' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
-          deployment_host: "HOST", app_name: "APP", branch_name?: true,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: true,
           branch_name: :head, tag_name: nil,
           system_caller: system_caller
         )
@@ -201,7 +214,7 @@ describe Paratrooper::SourceControl do
     context "when branch_name is the string HEAD" do
       it 'pushes HEAD' do
         config = instance_double(Paratrooper::Configuration, force_push: false,
-          deployment_host: "HOST", app_name: "APP", branch_name?: true,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: true,
           branch_name: "HEAD", tag_name: nil,
           system_caller: system_caller
         )
@@ -217,7 +230,7 @@ describe Paratrooper::SourceControl do
       it "issues command to forcefully push to remote" do
         config = instance_double(Paratrooper::Configuration,
           system_caller: system_caller, force_push: true,
-          deployment_host: 'HOST', app_name: 'APP', branch_name?: false,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: false,
           tag_name: nil
         )
         source_control = described_class.new(config)
@@ -231,7 +244,7 @@ describe Paratrooper::SourceControl do
     context "when branch_name is available" do
       it "pushes branch_name" do
         config = instance_double(Paratrooper::Configuration, force_push: false,
-          deployment_host: "HOST", app_name: "APP", branch_name?: true,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: true,
           branch_name: "BRANCH_NAME", tag_name: nil,
           system_caller: system_caller
         )
@@ -246,7 +259,7 @@ describe Paratrooper::SourceControl do
     context "when no reference is defined" do
       it "pushes HEAD" do
         config = instance_double(Paratrooper::Configuration, force_push: false,
-          deployment_host: "HOST", app_name: "APP", branch_name?: false,
+          deployment_host: "HOST", app_name: "APP", remote_name: "APP", branch_name?: false,
           tag_name: nil, system_caller: system_caller
         )
         source_control = described_class.new(config)

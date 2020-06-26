@@ -12,7 +12,7 @@ module Paratrooper
     end
 
     def remote
-      "git@#{config.deployment_host}:#{config.app_name}.git"
+      "git@#{config.deployment_host}:#{config.remote_name}.git"
     end
 
     def branch_name

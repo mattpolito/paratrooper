@@ -369,4 +369,20 @@ describe Paratrooper::Configuration do
       expect(configuration.branch_name).to eq("BRANCH_NAME")
     end
   end
+
+  describe "remote_name" do
+    context "with passed value" do
+      it "returns passed value" do
+        configuration.remote_name = "REMOTE_NAME"
+        expect(configuration.remote_name).to eq("REMOTE_NAME")
+      end
+    end
+
+    context "with no value passed" do
+      it "returns app_name" do
+        configuration.app_name = "APP_NAME"
+        expect(configuration.remote_name).to eq("APP_NAME")
+      end
+    end
+  end
 end

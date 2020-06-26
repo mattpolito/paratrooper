@@ -47,6 +47,8 @@ module Paratrooper
     #                               (default: looks in local Netrc file).
     #            :http_client     - Object responsible for making http calls
     #                               (optional).
+    #            :remote_name     - Name of the remote repository
+    #                               (optional, default: app_name).
     #
     def initialize(app_name, options = {}, &block)
       config.attributes = options.merge(app_name: app_name)

@@ -13,7 +13,7 @@ module Paratrooper
     attr_accessor :branch_name, :tag_name, :match_tag_name, :app_name, :api_key
     attr_writer :protocol, :heroku, :migration_check,
       :system_caller, :deployment_host, :http_client, :screen_notifier,
-      :source_control
+      :source_control, :remote_name
 
     alias :branch= :branch_name=
     alias :tag= :tag_name=
@@ -92,6 +92,10 @@ module Paratrooper
 
     def source_control
       @source_control ||= SourceControl.new(self)
+    end
+
+    def remote_name
+      @remote_name ||= app_name
     end
   end
 end
